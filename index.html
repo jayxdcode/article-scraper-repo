@@ -10,11 +10,55 @@
     body {
       font-family: 'Roboto Mono', monospace;
     }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 
 <body>
-  Nothing to see here. Wait for the UI in the next update ^^
+  <h1>Trigger GitHub Workflow</h1>
+  <button id="triggerButton">Run Workflow</button>
+
+  <script>
+    document.getElementById('triggerButton').addEventListener('click', function() {
+      const token = 'YOUR_PERSONAL_ACCESS_TOKEN';  // Replace with your GitHub PAT
+      const owner = 'YOUR_GITHUB_USERNAME';       // Replace with your GitHub username
+      const repo = 'YOUR_REPO_NAME';              // Replace with your repository name
+      const workflowId = 'scrape-editorials.yml'; // Replace with your workflow filename
+
+      fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ref: 'main' // Replace with your branch name if different from 'main'
+        })
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Workflow triggered successfully!');
+        } else {
+          alert('Failed to trigger workflow.');
+        }
+      })
+      .catch(error => {
+        alert('Error triggering workflow: ' + error);
+      });
+    });
+  </script>
 </body>
 
 </html>
