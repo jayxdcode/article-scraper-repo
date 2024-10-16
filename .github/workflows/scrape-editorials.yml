@@ -1,10 +1,9 @@
-
 name: Scrape Editorials
 
 on:
+  workflow_dispatch:  # Allows manual trigger
   schedule:
     - cron: '0 6 * * *'
-  workflow_dispatch:
 
 jobs:
   scrape:
@@ -35,3 +34,11 @@ jobs:
         git add editorials.txt
         git commit -m "Updated editorials"
         git push
+
+    - name: Trigger via API
+      run: |
+        curl -X POST \
+        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        https://api.github.com/repos/${{ github.repository }}/actions/workflows/scrape-editorials.yml/dispatches \
+        -d '{"ref": "main"}'
