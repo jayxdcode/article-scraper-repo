@@ -186,7 +186,7 @@ for site, link in latest_articles.items():
         # Save the article content to a text file
         with open(f"{site}-{datetime.now().strftime('%Y%m%d')}.txt", "w", encoding='utf-8') as f:
             f.write(f"{link} \n\n")
-            f.write(f"{site} — Editorial \n\n"
+            f.write(f"{site} — Editorial \n\n")
             f.write(article_content)
 
         # Save the article content to a markdown file
