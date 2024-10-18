@@ -25,7 +25,7 @@ jobs:
 
     - name: Scrape Philstar and Inquirer Editorials
       run: |
-        python /scrape.py
+        python scrape.py
 
     - name: Commit Editorials
       run: |
