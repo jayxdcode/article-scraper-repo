@@ -185,13 +185,13 @@ for site, link in latest_articles.items():
             article_content = extract_philstar_content(link)
 
         # Save the article content to a text file
-        with open(f"{site}-{datetime.now().strftime('%Y%m%d')}.txt", "w", encoding='utf-8') as f:
+        with open(f"articles/txt/{site}-{datetime.now().strftime('%Y%m%d')}.txt", "w", encoding='utf-8') as f:
             f.write(f"{link} \n\n")
             f.write(f"{site} — Editorial \n\n")
             f.write(article_content)
 
         # Save the article content to a markdown file
-        with open(f"{site}-{datetime.now().strftime('%Y%m%d')}.md", "w", encoding='utf-8') as f:
+        with open(f"articles/md/{site}-{datetime.now().strftime('%Y%m%d')}.md", "w", encoding='utf-8') as f:
             f.write(f"# {site} — Editorial")
             f.write("--- \n\n")
             f.write(article_content)
