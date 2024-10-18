@@ -68,7 +68,7 @@ for site, link in latest_articles.items():
       if site == 'Inquirer':
         article_content = extract_inquirer_content(link)
     else:
-    article_content = extract_philstar_content(link)
+      article_content = extract_philstar_content(link)
 
 # Save the article content to a text file
 with open(f"{site}_editorial.txt", "w", encoding='utf-8') as f:
