@@ -3,7 +3,7 @@ name: Scrape Editorials
 on:
   workflow_dispatch:  # Allows manual trigger
   schedule:
-    - cron: '0 6 * * *'  # Scheduled trigger (runs at 6:00 AM UTC)
+    - cron: '0 23 * * *'  # Scheduled trigger (runs at 10:00 PM UTC / 06:00 AM Philippine Time)
 
 jobs:
   scrape:
