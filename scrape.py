@@ -32,47 +32,6 @@ def get_latest_philstar_article(url):
 # Function to scrape the latest article link from Inquirer
 def get_latest_inquirer_article(url):
     print(f"Fetching latest article from {url}...")
-    response = requests.get(url)
-    if response.status_code == 200:
-        print("Successfully fetched Inquirer page.")
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        # Find the div with id 'opinion-v2-mh'
-        opinion_div = soup.find('div', id='opinion-v2-mh')
-        if opinion_div:
-            print("Found opinion-v2-mh div.")
-            # Now find the div with id 'opedv2'
-            opedv2_div = opinion_div.find('div', id='opedv2')
-            if opedv2_div:
-                print("Found opedv2 div.")
-                # Now find the div with id 'oped-lbl' to get the h1 tag and its link
-                oped_lbl_div = opedv2_div.find('div', id='oped-lbl')
-                if oped_lbl_div:
-                    print("Found oped-lbl div.")
-                    # Now find the 'h1' tag inside 'oped-lbl' to get the latest article link
-                    h1_tag = oped_lbl_div.find('h1')
-                    if h1_tag:
-                        latest_article = h1_tag.find('a', href=True)
-                        if latest_article:
-                            print("Latest article found on Inquirer.")
-                            return latest_article['href']
-                        else:
-                            print("No article link found in h1 tag on Inquirer.")
-                    else:
-                        print("No h1 tag found in oped-lbl div on Inquirer.")
-                else:
-                    print("No oped-lbl div found in opedv2 on Inquirer.")
-            else:
-                print("No opedv2 div found in opinion-v2-mh on Inquirer.")
-        else:
-            print("No opinion-v2-mh div found on Inquirer.")
-    
-    print("No article found on Inquirer.")
-    return "No article found"
-
-# Function to scrape the latest article link from Inquirer
-def get_latest_inquirer_article(url):
-    print(f"Fetching latest article from {url}...")
     
     # Adding a user-agent header
     headers = {
@@ -86,35 +45,15 @@ def get_latest_inquirer_article(url):
         print("Successfully fetched Inquirer page.")
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        title = soup.title.string
-        return title
-
-        # Find the div with id 'opinion-v2-mh'
-        opinion_div = soup.find('div', id='opinion-v2-mh')
-        if opinion_div:
-            print("Found opinion-v2-mh div.")
-            # Now find the div with id 'opedv2'
-            opedv2_div = opinion_div.find('div', id='opedv2')
-            if opedv2_div:
-                print("Found opedv2 div.")
-                # Now find the 'h1' tag inside 'oped-lbl' to get the latest article link
-                h1_tag = opedv2_div.find('h1')
-                if h1_tag:
-                    latest_article = h1_tag.find('a', href=True)
-                        
-                    if latest_article:
-                        print("Latest article found on Inquirer.")
-                        return latest_article['href']
-                    else:
-                            print("No article link found in h1 tag on Inquirer.")
-                else:
-                        print("No h1 tag found in oped-lbl div on Inquirer.")
-            else:
-                print("No opedv2 div found in opinion-v2-mh on Inquirer.")
+        latest_article = soup.find('a', class_='entry-title', href=True)
+        if latest_article:
+            print("Latest article found on Inquirer.")
+            return latest_article['href']
         else:
-            print("No opinion-v2-mh div found on Inquirer.")
+            print("No article found on Inquirer.")
+    else:
+        print(f"Failed to fetch Inquirer page. Status code: {response.status_code}")
     
-    print("No article found on Inquirer.")
     return "No article found"
 
 # Function to extract the content of the article for Philstar
@@ -125,25 +64,20 @@ def extract_philstar_content(article_url):
         print("Successfully fetched Philstar article.")
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        title = soup.title.string
-        return title
-
-        # Ensure the div exists
+        title = soup.title.string.strip()  # Extract the title of the article
         article_content_div = soup.find('div', id='sports_article_writeup')
         if article_content_div:
             paragraphs = article_content_div.find_all('p')
             article_text = "\n".join([para.get_text() for para in paragraphs])
             print("Content extracted from Philstar article.")
-            return article_text
+            return title, article_text
         
         print("No content div found in Philstar article.")
     else:
         print(f"Failed to fetch Philstar article. Status code: {response.status_code}")
 
-    return "No content found"
-    
-    
-    
+    return "No title", "No content found"
+
 # Function to extract the content of the article for Inquirer
 def extract_inquirer_content(article_url):
     print(f"Fetching article content from {article_url}...")
@@ -160,19 +94,19 @@ def extract_inquirer_content(article_url):
         print("Successfully fetched article page.")
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # Extract all paragraph tags inside the article
+        title = soup.title.string.strip()  # Extract the title of the article
         paragraphs = soup.find('section', id='inq_section').find_all('p')
         article_text = "\n\n".join([para.get_text() for para in paragraphs])
 
         if article_text:
             print("Article content extracted successfully.")
-            return article_text
+            return title, article_text
         else:
             print("No paragraphs found in the article.")
     else:
         print("Failed to fetch article page.")
 
-    return "No content found"
+    return "No title", "No content found"
 
 # Dictionary to store the results
 latest_articles = {}
@@ -186,9 +120,9 @@ for site, link in latest_articles.items():
     if link != "No article found":
         print(f"Extracting content for {site} article...")
         if site == 'Inquirer':
-            article_content =  extract_inquirer_content(link)
+            title, article_content = extract_inquirer_content(link)
         else:
-            article_content = extract_philstar_content(link)
+            title, article_content = extract_philstar_content(link)
 
         # Save the article content to a text file
         with open(f"articles/txt/{site}-{datetime.now().strftime('%Y%m%d')}.txt", "w", encoding='utf-8') as f:
@@ -198,7 +132,7 @@ for site, link in latest_articles.items():
 
         # Save the article content to a markdown file
         with open(f"articles/md/{site}-{datetime.now().strftime('%Y%m%d')}.md", "w", encoding='utf-8') as f:
-            f.write(f"# {title}")
+            f.write(f"# {title}\n\n")
             f.write(f"{link} \n\n")
             f.write("-- \n\n")
             f.write(article_content)
@@ -206,5 +140,3 @@ for site, link in latest_articles.items():
         print(f"Content for {site} article saved successfully.")
     else:
         print(f"No article found for {site}")
-        
-         
