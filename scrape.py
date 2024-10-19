@@ -94,7 +94,7 @@ def extract_inquirer_content(article_url):
         print("Successfully fetched article page.")
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        title = f("{soup.title.string.strip()} \n\n")  # Extract the title of the article
+        title = f"{soup.title.string.strip()} \n\n"  # Extract the title of the article
 
         # Get all <p> tags and <h2> tags with class 'wp-block-heading' within the main article section
         article_section = soup.find('section', id='inq_section')
