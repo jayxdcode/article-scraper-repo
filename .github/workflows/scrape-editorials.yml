@@ -31,6 +31,7 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add articles/docx/Inquirer/Inquirer-$(date +%Y%m%d).docx articles/md/Philstar/Philstar-$(date +%Y%m%d).md articles/md/Inquirer/Inquirer-$(date +%Y%m%d).md articles/md/Philstar/Philstar-$(date +%Y%m%d).md
+        git add articles/docx/* articles/md/*
+        # git add articles/docx/Inquirer/Inquirer-$(date +%Y%m%d).docx articles/md/Philstar/Philstar-$(date +%Y%m%d).md articles/md/Inquirer/Inquirer-$(date +%Y%m%d).md articles/md/Philstar/Philstar-$(date +%Y%m%d).md
         git commit -m "Updated Philstar and Inquirer editorials for $(date +'%b. %d, %Y (%a)')"
         git push
