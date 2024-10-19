@@ -85,6 +85,9 @@ def get_latest_inquirer_article(url):
     if response.status_code == 200:
         print("Successfully fetched Inquirer page.")
         soup = BeautifulSoup(response.content, 'html.parser')
+        
+        title = soup.title.string
+        return title
 
         # Find the div with id 'opinion-v2-mh'
         opinion_div = soup.find('div', id='opinion-v2-mh')
@@ -121,6 +124,9 @@ def extract_philstar_content(article_url):
     if response.status_code == 200:
         print("Successfully fetched Philstar article.")
         soup = BeautifulSoup(response.content, 'html.parser')
+        
+        title = soup.title.string
+        return title
 
         # Ensure the div exists
         article_content_div = soup.find('div', id='sports_article_writeup')
@@ -155,8 +161,8 @@ def extract_inquirer_content(article_url):
         soup = BeautifulSoup(response.content, 'html.parser')
 
         # Extract all paragraph tags inside the article
-        paragraphs = soup.find_all('p')
-        article_text = "\n".join([para.get_text() for para in paragraphs])
+        paragraphs = soup.find('section', id='inq_section').find_all('p')
+        article_text = "\n\n".join([para.get_text() for para in paragraphs])
 
         if article_text:
             print("Article content extracted successfully.")
@@ -187,13 +193,14 @@ for site, link in latest_articles.items():
         # Save the article content to a text file
         with open(f"articles/txt/{site}-{datetime.now().strftime('%Y%m%d')}.txt", "w", encoding='utf-8') as f:
             f.write(f"{link} \n\n")
-            f.write(f"{site} — Editorial \n\n")
+            f.write(f"{title} \n\n")
             f.write(article_content)
 
         # Save the article content to a markdown file
         with open(f"articles/md/{site}-{datetime.now().strftime('%Y%m%d')}.md", "w", encoding='utf-8') as f:
-            f.write(f"# {site} — Editorial")
-            f.write("--- \n\n")
+            f.write(f"# {title}")
+            f.write(f"{link} \n\n")
+            f.write("-- \n\n")
             f.write(article_content)
 
         print(f"Content for {site} article saved successfully.")
