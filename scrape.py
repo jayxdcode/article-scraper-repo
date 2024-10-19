@@ -138,6 +138,8 @@ for site, link in latest_articles.items():
         os.makedirs(output_directory, exist_ok=True)
 
         output_filename = f"articles/docx/{site}/{site}-{datetime.now().strftime('%Y%m%d')}.docx"
+        output_directory = f"articles/docx/{site}"
+
         pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
 
         print(f"Content for {site} article saved as DOCX successfully.")
