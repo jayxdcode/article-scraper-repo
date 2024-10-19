@@ -45,10 +45,10 @@ def get_latest_inquirer_article(url):
         print("Successfully fetched Inquirer page.")
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        latest_article = soup.find('a', class_='entry-title', href=True)
+        latest_article = soup.find('div', id='opinion-v2-mh').find_all('a', href=True)
         if latest_article:
             print("Latest article found on Inquirer.")
-            return latest_article['href']
+            return latest_article[0]['href']
         else:
             print("No article found on Inquirer.")
     else:
@@ -64,7 +64,7 @@ def extract_philstar_content(article_url):
         print("Successfully fetched Philstar article.")
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        title = soup.title.string.strip()  # Extract the title of the article
+        title = f"\n {soup.title.string.strip()} \n\n"  # Extract the title of the article
         article_content_div = soup.find('div', id='sports_article_writeup')
         if article_content_div:
             paragraphs = article_content_div.find_all('p')
@@ -78,7 +78,7 @@ def extract_philstar_content(article_url):
 
     return "No title", "No content found"
 
-# Function to extract the content of the article for Inquirer
+# Function to extract the content of the article for Inquirer, handling <h2> and <p> tags
 def extract_inquirer_content(article_url):
     print(f"Fetching article content from {article_url}...")
     
@@ -95,8 +95,31 @@ def extract_inquirer_content(article_url):
         soup = BeautifulSoup(response.content, 'html.parser')
 
         title = soup.title.string.strip()  # Extract the title of the article
-        paragraphs = soup.find('section', id='inq_section').find_all('p')
-        article_text = "\n\n".join([para.get_text() for para in paragraphs])
+
+        # Get all <p> tags and <h2> tags with class 'wp-block-heading' within the main article section
+        article_section = soup.find('section', id='inq_section')
+        if article_section is None:
+            print("Could not find the section with id='inq_section'.")
+            return "No title", "No content found"
+
+        paragraphs_and_headings = article_section.find_all(['p', 'h2'])
+
+        # Convert tags to a list of text (including headings)
+        article_content = []
+        for tag in paragraphs_and_headings:
+            if tag.name == 'h2' and 'wp-block-heading' in tag.get('class', []):
+                article_content.append(f"\n\n{tag.get_text()}\n\n")  # Add spacing for headings
+            elif tag.name == 'p':
+                article_content.append(tag.get_text())  # Regular paragraph
+
+        # Exclude the last 2 paragraphs and the 5th & 6th to the last ones
+        filtered_content = article_content[:-2]  # Remove last 2 paragraphs
+        filtered_content = filtered_content[:-3] + filtered_content[-2:]  # Also remove 5th and 6th to the last
+
+        # Remove the paragraph containing the privacy policy sentence
+        filtered_content = [para for para in filtered_content if not para.startswith("By providing an email address.")]
+
+        article_text = "\n\n".join(filtered_content)
 
         if article_text:
             print("Article content extracted successfully.")
@@ -134,7 +157,7 @@ for site, link in latest_articles.items():
         with open(f"articles/md/{site}-{datetime.now().strftime('%Y%m%d')}.md", "w", encoding='utf-8') as f:
             f.write(f"# {title}\n\n")
             f.write(f"{link} \n\n")
-            f.write("-- \n\n")
+            f.write("*** \n\n")
             f.write(article_content)
 
         print(f"Content for {site} article saved successfully.")
