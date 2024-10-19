@@ -108,7 +108,7 @@ def extract_inquirer_content(article_url):
         article_content = []
         for tag in paragraphs_and_headings:
             if tag.name == 'h2' and 'wp-block-heading' in tag.get('class', []):
-                article_content.append(f"\n\n{tag.get_text()}\n\n")  # Add spacing for headings
+                article_content.append(f"\n\n##  {tag.get_text()}\n\n")  # Add spacing for headings
             elif tag.name == 'p':
                 article_content.append(tag.get_text())  # Regular paragraph
 
