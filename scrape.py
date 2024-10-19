@@ -64,11 +64,11 @@ def extract_philstar_content(article_url):
         print("Successfully fetched Philstar article.")
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        title = f"\n {soup.title.string.strip()} \n\n"  # Extract the title of the article
+        title = f"{soup.title.string.strip()} \n\n"  # Extract the title of the article
         article_content_div = soup.find('div', id='sports_article_writeup')
         if article_content_div:
             paragraphs = article_content_div.find_all('p')
-            article_text = "\n".join([para.get_text() for para in paragraphs])
+            article_text = "\n\n".join([para.get_text() for para in paragraphs])
             print("Content extracted from Philstar article.")
             return title, article_text
         
@@ -94,7 +94,7 @@ def extract_inquirer_content(article_url):
         print("Successfully fetched article page.")
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        title = soup.title.string.strip()  # Extract the title of the article
+        title = f("{soup.title.string.strip()} \n\n")  # Extract the title of the article
 
         # Get all <p> tags and <h2> tags with class 'wp-block-heading' within the main article section
         article_section = soup.find('section', id='inq_section')
@@ -150,7 +150,7 @@ for site, link in latest_articles.items():
         # Save the article content to a text file
         with open(f"articles/txt/{site}-{datetime.now().strftime('%Y%m%d')}.txt", "w", encoding='utf-8') as f:
             f.write(f"{link} \n\n")
-            f.write(f"{title} \n\n")
+            f.write(f"\n {title} \n\n")
             f.write(article_content)
 
         # Save the article content to a markdown file
