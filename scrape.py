@@ -134,11 +134,9 @@ for site, link in latest_articles.items():
         print(f"Markdown content for {site} article saved successfully.")
 
         # Convert Markdown string to DOCX
-
-        os.makedirs(output_directory, exist_ok=True)
-
-        output_filename = f"articles/docx/{site}/{site}-{datetime.now().strftime('%Y%m%d')}.docx"
         output_directory = f"articles/docx/{site}"
+        output_filename = f"articles/docx/{site}/{site}-{datetime.now().strftime('%Y%m%d')}.docx"
+        os.makedirs(output_directory, exist_ok=True)
 
         pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
 
