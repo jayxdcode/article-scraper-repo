@@ -3,6 +3,10 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 import pypandoc
 import os
+import datetime
+
+# Verify timezone
+print(f"STARTING... CURRENT TIME: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}")
 
 # URLs of the websites to scrape
 urls = {
