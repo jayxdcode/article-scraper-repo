@@ -121,11 +121,11 @@ def extract_inquirer_content(article_url):
     return "### No title", "No content found"
 
 # Function to save article as markdown and docx
-def save_article(article_url, filename_prefix):
+def save_article(article_url, filename_prefix, output_directory):
     title, article_content = extract_philstar_content(article_url)
 
     # Combine title, link, and article content into a single Markdown string
-    markdown_content = f"# {title}\n\n{article_url}\n\n***\n\n{article_content}"
+    markdown_content = f"# {title}\n\n{article_url}\n\n\n\n{article_content}"
 
     # Save the article content to a markdown file
     markdown_filename = f"articles/md/Philstar/{filename_prefix}.md"
@@ -136,8 +136,8 @@ def save_article(article_url, filename_prefix):
     print(f"!!! Markdown content saved as {filename_prefix}.md successfully.")
 
     # Convert Markdown string to DOCX
-    output_directory = f"articles/docx/Philstar"
-    output_filename = f"articles/docx/Philstar/{filename_prefix}.docx"
+
+    output_filename = f"{output_directory}/{filename_prefix}.docx"
     os.makedirs(output_directory, exist_ok=True)
 
     pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
@@ -161,10 +161,10 @@ for site, link in latest_articles.items():
             title, article_content = extract_philstar_content(link)
 
         # Combine title, link, and article content into a single Markdown string
-        markdown_content = f"# {title}\n\n{link}\n\n***\n\n{article_content}"
+        markdown_content = f"# {title}\n\n{link}\n\n\n\n{article_content}"
 
         # Save the article content to a markdown file
-        markdown_filename = f"articles/md/{site}/{site}-{datetime.now().strftime('%Y%m%d')}.md"
+        markdown_filename = f"articles/md/{site}/{title}-{datetime.now().strftime('%Y%m%d')}.md"
         os.makedirs(os.path.dirname(markdown_filename), exist_ok=True)  # Ensure directory exists
         with open(markdown_filename, "w", encoding='utf-8') as f:
             f.write(markdown_content)
@@ -173,7 +173,7 @@ for site, link in latest_articles.items():
 
         # Convert Markdown string to DOCX
         output_directory = f"articles/docx/{site}"
-        output_filename = f"articles/docx/{site}/{site}-{datetime.now().strftime('%Y%m%d')}.docx"
+        output_filename = f"articles/docx/{site}/{title}-{datetime.now().strftime('%Y%m%d')}.docx"
         os.makedirs(output_directory, exist_ok=True)
 
         pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
