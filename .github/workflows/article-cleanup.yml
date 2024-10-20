@@ -44,11 +44,13 @@ jobs:
             echo "Action authorized. Proceeding with cleanup. DO NOT SHARE THE PASSCODE!"
           fi
 
-          # Perform cleanup operations
+          # Check for 'articles' folder and perform cleanup operations
           echo "Performing cleanup operations..."
           sleep 1
-          echo "Finding 'articles' folder..."
-          if ls | grep -q 'articles'; then
+          echo "Finding 'articles/' folder..."
+
+          # Check if the 'articles' folder exists in the current directory
+          if [ -d "articles" ]; then
             echo "Folder exists. Proceeding with the clean up."
             rm -rf articles/*
             echo "Clean up successful!"
