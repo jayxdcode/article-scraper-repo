@@ -73,7 +73,7 @@ def extract_philstar_content(article_url):
     response = requests.get(article_url)
     if response.status_code == 200:
         print("!!! Successfully fetched Philstar article.")
-        title = f"{BeautifulSoup(response.content, 'html.parser').title.string.strip()} \n\n"  # Extract the title
+        title = BeautifulSoup(response.content, 'html.parser').title.string.strip()  # Extract the title
         article_content_div = BeautifulSoup(response.content, 'html.parser').find('div', id='sports_article_writeup')
         if article_content_div:
             paragraphs = article_content_div.find_all('p')
@@ -95,7 +95,7 @@ def extract_inquirer_content(article_url):
     if response.status_code == 200:
         print("!!! Successfully fetched article page.")
         soup = BeautifulSoup(response.content, 'html.parser')
-        title = f"{soup.title.string.strip()} \n\n"
+        title = soup.title.string.strip()
         article_section = soup.find('section', id='inq_section')
         if article_section is None:
             print("### Could not find the section with id='inq_section'.")
@@ -164,7 +164,7 @@ for site, link in latest_articles.items():
         markdown_content = f"# {title}\n\n{link}\n\n\n\n{article_content}"
 
         # Save the article content to a markdown file
-        markdown_filename = f"articles/{title}-{datetime.now().strftime('%Y%m%d')}.md"  # Save directly to articles folder
+        markdown_filename = f"articles/{datetime.now().strftime('%Y%m%d')} [{title}].md"  # Save directly to articles folder
         os.makedirs(os.path.dirname(markdown_filename), exist_ok=True)  # Ensure directory exists
         with open(markdown_filename, "w", encoding='utf-8') as f:
             f.write(markdown_content)
@@ -172,7 +172,7 @@ for site, link in latest_articles.items():
         print(f"!!! Markdown content for {site} article saved successfully.")
 
         # Convert Markdown string to DOCX
-        output_filename = f"articles/{title}-{datetime.now().strftime('%Y%m%d')}.docx"  # Save directly to articles folder
+        output_filename = f"articles/{datetime.now().strftime('%Y%m%d')} [{title}].docx"  # Save directly to articles folder
         pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
 
         print(f"!!! Content for {site} article saved as DOCX successfully.")
