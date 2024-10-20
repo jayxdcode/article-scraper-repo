@@ -34,6 +34,6 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add articles/docx/* articles/md/*
+        git add articles/* # articles/docx/* articles/md/*
         git commit -m "Updated Philstar and Inquirer editorials for $(date +'%b. %d, %Y (%a)')"
         git push
