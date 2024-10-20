@@ -1,0 +1,48 @@
+name: article-cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_cleanup:
+        description: 'Are you sure you wanna do the cleanup? Type "YES" to continue, else cancel workflow run.'
+        required: true
+      passcode_input:
+        description: 'Enter the passcode to authorize the cleanup'
+        required: true
+
+jobs:
+  validate_and_cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        if: ${{ github.event.inputs.confirm_cleanup != 'YES' }}
+        run: |
+          echo "Cleanup canceled by user."
+          exit 1
+          
+      - name: Check passcode
+        run: |
+          input_passcode="${{ github.event.inputs.passcode_input }}"
+          secret_passcode="${{ secrets.CLEANUP_PASSCODE }}"
+          
+          if [ "$input_passcode" != "$secret_passcode" ]; then
+            echo "Incorrect passcode. Exiting workflow."
+            exit 1
+          else
+            echo "Passcode is correct. Proceeding with cleanup. DO NOT SHARE THE PASSCODE!"
+          fi
+
+      - name: Perform cleanup (example step)
+        run: |
+          echo "Performing cleanup operations..."
+          sleep 1
+          echo "Finding `articles/` folder..."
+          if [ ls | grep 'articles' == 'articles' ]; then
+            echo "Folder exists. Proceeding with the clean up"
+          else
+            echo "Folder doesn't exist. Exiting the workflow..."
+            sleep 0.5
+            exit 1
+          fi
+          rm -rf articles/*
+          echo "Clean up successful!"
