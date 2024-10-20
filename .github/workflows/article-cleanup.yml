@@ -2,22 +2,33 @@ name: article-cleanup
 
 on:
   workflow_dispatch:
+    inputs:
+      favorite_word:
+        description: "What's your favorite word? [No wrong answers.]"
+        required: true
 
 jobs:
   validate_and_cleanup:
     runs-on: ubuntu-latest
     steps:
+      - name: Get Favorite Word
+        run: |
+          echo
+          echo "Your favorite word is: ${{ github.event.inputs.favorite_word }}"
+          echo
+
       - name: Check confirmation
         run: |
-        echo "Are you sure you wanna do the cleanup? Type "YES" to continue, else cancel workflow run. CASE SENSITIVE!"
-        read confirmation
-        if [ confirmation != 'YES']; then
-          echo "Cleanup canceled by user."
-          exit 1
-          
+          echo "Are you sure you wanna do the cleanup? Type 'YES' to continue, else cancel workflow run. CASE SENSITIVE!"
+          read confirmation
+          if [ "$confirmation" != 'YES' ]; then
+            echo "Cleanup canceled by user."
+            exit 1
+          fi
+
       - name: Check passcode
         run: |
-          echo "Input passcode for 2nd Level authorization.
+          echo "Input passcode for 2nd Level authorization."
           read input_passcode
           secret_passcode="${{ secrets.CLEANUP_PASSCODE }}"
           
@@ -32,9 +43,9 @@ jobs:
         run: |
           echo "Performing cleanup operations..."
           sleep 1
-          echo "Finding `articles/` folder..."
-          if [ ls | grep 'articles' == 'articles' ]; then
-            echo "Folder exists. Proceeding with the clean up"
+          echo "Finding 'articles/' folder..."
+          if ls | grep -q 'articles'; then
+            echo "Folder exists. Proceeding with the clean up."
           else
             echo "Folder doesn't exist. Exiting the workflow..."
             sleep 0.5
