@@ -3,7 +3,6 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 import pypandoc
 import os
-import datetime
 
 # Verify timezone
 print(f"STARTING... CURRENT TIME: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}")
@@ -26,7 +25,7 @@ def get_latest_philstar_article(url):
         latest_top_article = soup.find('div', class_='carousel__item carousel__item-0').find('a', href=True)
         if latest_top_article:
             print(f"!!! Latest top article found on Philstar: {latest_top_article['href']}")
-            save_article(latest_top_article['href'], "Philstar-Latest-Top", "articles")
+            save_article(latest_top_article['href'], title, "articles")
 
         # Fetch the actual latest article with time filter
         latest_article = None
