@@ -171,10 +171,13 @@ for site, link in latest_articles.items():
 
         print(f"!!! Markdown content for {site} article saved successfully.")
 
+        # Ensure the directories exist before saving DOCX
+        output_filename = f"articles/{site}/docx/[{datetime.now().strftime('%Y%m%d')}] {title}.docx"
+        os.makedirs(os.path.dirname(output_filename), exist_ok=True)  # Ensure directory exists
+
         # Convert Markdown string to DOCX
-        output_filename = f"articles/{site}/docx/[{datetime.now().strftime('%Y%m%d')}] {title}.docx"  # Save directly to articles folder
         pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
 
         print(f"!!! Content for {site} article saved as DOCX successfully.")
     else:
-        print(f"### No article found for {site}")
+        print(f"NO ARTICLE FOUND: {site}")
