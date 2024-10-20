@@ -5,7 +5,7 @@ import pypandoc
 import os
 
 # Verify timezone
-print(f"STARTING... CURRENT TIME: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}")
+print(f"STARTING... CURRENT TIME: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}")
 
 # URLs of the websites to scrape
 urls = {
