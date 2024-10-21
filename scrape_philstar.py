@@ -1,6 +1,7 @@
+import os
 import requests
 from bs4 import BeautifulSoup
-import os
+import pypandoc
 
 def extract_philstar_content(article_url):
     # Dummy implementation; replace with your actual content extraction logic
@@ -16,10 +17,25 @@ def save_article(url, title, save_path):
     # Ensure the directory exists
     os.makedirs(save_path, exist_ok=True)
 
-    # Save title and URL to a markdown file
+    # Save title and content to a markdown file
     title_filename = title.replace(' ', '_').replace('/', '_') + '.md'
-    with open(os.path.join(save_path, title_filename), 'w') as file:
+    md_file_path = os.path.join(save_path, title_filename)
+    
+    with open(md_file_path, 'w') as file:
         file.write(f"# {title}\n\n[Read more here]({url})\n")
+
+    # Convert Markdown to DOCX
+    convert_md_to_docx(md_file_path, save_path, title)
+
+def convert_md_to_docx(md_file_path, save_path, title):
+    title_filename = title.replace(' ', '_').replace('/', '_') + '.docx'
+    docx_file_path = os.path.join(save_path, title_filename)
+    
+    try:
+        pypandoc.convert_file(md_file_path, 'docx', outputfile=docx_file_path)
+        print(f"!!! Converted {md_file_path} to {docx_file_path}.")
+    except Exception as e:
+        print(f"### Failed to convert {md_file_path} to DOCX: {str(e)}")
 
 def get_latest_philstar_article(url):
     print(f"!!! Fetching latest article from {url}...")
