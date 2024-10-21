@@ -32,7 +32,10 @@ jobs:
 
     - name: Scrape Philstar and Inquirer Editorials
       run: |
-        python scrape.py
+        python scrape_philstar.py
+        echo
+        echo
+        python scrape_inquirer.py
 
     - name: Commit Editorials
       run: |
