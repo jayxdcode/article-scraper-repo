@@ -171,7 +171,7 @@ for site, link in latest_articles.items():
         markdown_content = f"# {title}\n\n{link}\n\n\n\n{article_content}"
 
         # Save the article content to a markdown file
-        markdown_filename = f"articles/docx/{site}/[{datetime.now(timezone(timedelta(hours=8))).strftime('%Y%m%d')}] {title}.docx"  # Save directly to articles folder
+        markdown_filename = f"articles/docx/{site}/[{current_datetime}] {title}.docx"  # Save directly to articles folder
         os.makedirs(os.path.dirname(markdown_filename), exist_ok=True)  # Ensure directory exists
         with open(markdown_filename, "w", encoding='utf-8') as f:
             f.write(markdown_content)
