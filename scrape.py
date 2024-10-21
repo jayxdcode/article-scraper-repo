@@ -97,12 +97,17 @@ def extract_inquirer_content(article_url):
     if response.status_code == 200:
         print("!!! Successfully fetched article page.")
         soup = BeautifulSoup(response.content, 'html.parser')
-        title = soup.title.string.strip()
+
+        # Try to get the article title
+        title = soup.title.string.strip() if soup.title else "Untitled Article"  # Default to "Untitled Article" if no title found
+
+        # Find the article content section
         article_section = soup.find('section', id='inq_section')
         if article_section is None:
             print("### Could not find the section with id='inq_section'.")
-            return "### No title", "No content found"
+            return title, "No content found"
 
+        # Extract headings and paragraphs from the section
         paragraphs_and_headings = article_section.find_all(['p', 'h2'])
         article_content = []
         for tag in paragraphs_and_headings:
@@ -111,14 +116,14 @@ def extract_inquirer_content(article_url):
             elif tag.name == 'p':
                 article_content.append(tag.get_text())
 
-
+        # Filter out unnecessary content
         filtered_content = [para for para in article_content if not para.startswith("")]
         filtered_content = [para for para in filtered_content if not para.startswith("Subscribe to our daily newsletter")]
         filtered_content = [para for para in filtered_content if not para.startswith("Subscribe to our newsletter!")]
-        filtered_content = [para for para in filtered_content if not para.startswith("We use cookies to enhance your experience. By continuing, you agree to our use of cookies. Learn more here.")]  
+        filtered_content = [para for para in filtered_content if not para.startswith("We use cookies to enhance your experience.")]
         filtered_content = [para for para in filtered_content if not para.startswith("This is an information message")]
-        filtered_content = [para for para in filtered_content if not para.startswith("By providing an email address. I agree to the Terms of Use and acknowledge that I have read the Privacy Policy.")]
         filtered_content = [para for para in filtered_content if not para.startswith("By providing an email address.")]
+        
         article_text = "\n\n".join(filtered_content)
 
         if article_text:
@@ -128,7 +133,7 @@ def extract_inquirer_content(article_url):
             print("### No paragraphs found in the article.")
     else:
         print("### Failed to fetch article page.")
-    return "### No title", "No content found"
+    return "Untitled Article", "No content found"
 
 # Function to save article as markdown and docx
 def save_article(article_url, title):  # Remove output_directory argument
