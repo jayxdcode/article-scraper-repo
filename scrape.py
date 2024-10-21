@@ -4,8 +4,6 @@ from bs4 import BeautifulSoup
 import pypandoc
 import os
 
-current_datetime = datetime.now().strftime('%Y%m%d')
-
 # Verify timezone
 print(f"STARTING... CURRENT TIME: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
@@ -171,6 +169,9 @@ for site, link in latest_articles.items():
             title, article_content = extract_inquirer_content(link)
         else:
             title, article_content = extract_philstar_content(link)
+
+        # Date for title
+        current_datetime = datetime.now().strftime('%Y%m%d')
 
         # Combine title, link, and article content into a single Markdown string
         markdown_content = f"# {title}\n\n{link}\n\n\n\n{article_content}"
