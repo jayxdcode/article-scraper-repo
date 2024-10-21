@@ -1,11 +1,8 @@
 import requests
-from datetime import datetime, timezone, timedelta  # Import timezone and timedelta
 from bs4 import BeautifulSoup
 import pypandoc
 import os
-
-# Verify timezone
-print(f"STARTING... CURRENT TIME: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+from datetime import datetime
 
 # URLs of the websites to scrape
 urls = {
@@ -21,13 +18,6 @@ def get_latest_philstar_article(url):
         print("!!! Successfully fetched Philstar page.")
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # Fetch the top article
-        latest_top_article = soup.find('div', class_='carousel__item carousel__item-0').find('a', href=True)
-        if latest_top_article:
-            print(f"!!! Latest top article found on Philstar: {latest_top_article['href']}")
-            title = extract_philstar_content(latest_top_article['href'])[0]  # Get the title
-            save_article(latest_top_article['href'], title)  # Save to articles folder
-
         # Fetch the actual latest article with time filter
         latest_article = None
         for item in soup.find_all('div', class_='carousel__item'):
@@ -38,13 +28,13 @@ def get_latest_philstar_article(url):
 
         if latest_article:
             print(f"!!! Latest article found on Philstar: {time_text}")
-            return latest_article['href']
+            return latest_article['href'], True  # Return link and date tag status
         else:
             print("### No recent article found on Philstar.")
-            return "### No article found"
+            return "### No article found", False
     else:
         print(f"### Failed to fetch Philstar page. Status code: {response.status_code}")
-        return "### Failed to fetch"
+        return "### Failed to fetch", False
 
 # Function to scrape the latest article link from Inquirer
 def get_latest_inquirer_article(url):
@@ -59,13 +49,13 @@ def get_latest_inquirer_article(url):
         latest_article = soup.find('div', id='opinion-v2-mh').find_all('a', href=True)
         if latest_article:
             print("!!! Latest article found on Inquirer.")
-            return latest_article[0]['href']
+            return latest_article[0]['href'], True  # Assuming it has a date tag
         else:
             print("### No article found on Inquirer.")
     else:
         print(f"### Failed to fetch Inquirer page. Status code: {response.status_code}")
 
-    return "### No article found"
+    return "### No article found", False
 
 # Function to extract content from Philstar
 def extract_philstar_content(article_url):
@@ -95,61 +85,52 @@ def extract_inquirer_content(article_url):
     if response.status_code == 200:
         print("!!! Successfully fetched article page.")
         soup = BeautifulSoup(response.content, 'html.parser')
-
-        # Try to get the article title
-        title = soup.title.string.strip() if soup.title else "Untitled Article"  # Default to "Untitled Article" if no title found
-
-        # Find the article content section
+        title = soup.title.string.strip()
         article_section = soup.find('section', id='inq_section')
         if article_section is None:
             print("### Could not find the section with id='inq_section'.")
-            return title, "No content found"
+            return "### No title", "No content found"
 
-        # Extract headings and paragraphs from the section
         paragraphs_and_headings = article_section.find_all(['p', 'h2'])
         article_content = []
         for tag in paragraphs_and_headings:
-            if tag.name == 'h2' and 'wp-block-heading' in tag.get('class', []):
+            if tag.name == 'h2':
                 article_content.append(f"\n\n##  {tag.get_text()}\n\n")
             elif tag.name == 'p':
                 article_content.append(tag.get_text())
 
-        # Filter out unnecessary content
-        filtered_content = [para for para in article_content if not para.startswith("")]
-        filtered_content = [para for para in filtered_content if not para.startswith("Subscribe to our daily newsletter")]
-        filtered_content = [para for para in filtered_content if not para.startswith("Subscribe to our newsletter!")]
-        filtered_content = [para for para in filtered_content if not para.startswith("We use cookies to enhance your experience.")]
-        filtered_content = [para for para in filtered_content if not para.startswith("This is an information message")]
-        filtered_content = [para for para in filtered_content if not para.startswith("By providing an email address.")]
-        
-        article_text = "\n\n".join(filtered_content)
-
-        if article_text:
-            print("!!! Article content extracted successfully.")
-            return title, article_text
-        else:
-            print("### No paragraphs found in the article.")
+        article_text = "\n\n".join(article_content)
+        return title, article_text
     else:
         print("### Failed to fetch article page.")
-    return "Untitled Article", "No content found"
+    return "### No title", "No content found"
 
 # Function to save article as markdown and docx
-def save_article(article_url, title):  # Remove output_directory argument
+def save_article(article_url, title, has_date_tag, site):
     article_content = extract_philstar_content(article_url)[1]  # Get article content only
 
     # Combine title, link, and article content into a single Markdown string
     markdown_content = f"# {title}\n\n{article_url}\n\n\n\n{article_content}"
 
-    # Save the article content to a markdown file in the articles folder
-    markdown_filename = f"articles/{title}.md"  # Save directly to articles folder
+    # Determine the correct directory based on whether the article has a date tag or not
+    if has_date_tag:
+        markdown_dir = f"articles/md/{site}/"
+        docx_dir = f"articles/docx/{site}/"
+    else:
+        markdown_dir = "articles/tps-top/md/"
+        docx_dir = "articles/tps-top/docx/"
+
+    # Save Markdown content
+    markdown_filename = f"{markdown_dir}{title}.md"
     os.makedirs(os.path.dirname(markdown_filename), exist_ok=True)  # Ensure directory exists
     with open(markdown_filename, "w", encoding='utf-8') as f:
         f.write(markdown_content)
 
     print(f"!!! Markdown content saved as {title}.md successfully.")
 
-    # Convert Markdown string to DOCX
-    output_filename = f"articles/{title}.docx"  # Save directly to articles folder
+    # Convert Markdown string to DOCX and save
+    output_filename = f"{docx_dir}{title}.docx"
+    os.makedirs(os.path.dirname(output_filename), exist_ok=True)  # Ensure directory exists
     pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
 
     print(f"!!! Content saved as {title}.docx successfully.")
@@ -158,8 +139,8 @@ def save_article(article_url, title):  # Remove output_directory argument
 latest_articles = {}
 
 # Scrape the articles from both websites
-latest_articles['Philstar'] = get_latest_philstar_article(urls['Philstar'])
-latest_articles['Inquirer'] = get_latest_inquirer_article(urls['Inquirer'])
+latest_articles['Philstar'], philstar_has_date_tag = get_latest_philstar_article(urls['Philstar'])
+latest_articles['Inquirer'], inquirer_has_date_tag = get_latest_inquirer_article(urls['Inquirer'])
 
 # Extract and convert the article content
 for site, link in latest_articles.items():
@@ -167,31 +148,12 @@ for site, link in latest_articles.items():
         print(f"!!! Extracting content from {site}...")
         if site == 'Inquirer':
             title, article_content = extract_inquirer_content(link)
+            has_date_tag = inquirer_has_date_tag
         else:
             title, article_content = extract_philstar_content(link)
+            has_date_tag = philstar_has_date_tag
 
-        # Date for title
-        current_datetime = datetime.now().strftime('%Y%m%d')
-
-        # Combine title, link, and article content into a single Markdown string
-        markdown_content = f"# {title}\n\n{link}\n\n\n\n{article_content}"
-
-        # Save the article content to a markdown file
-        markdown_filename = f"articles/docx/{site}/[{current_datetime}] {title}.docx"  # Save directly to articles folder
-        os.makedirs(os.path.dirname(markdown_filename), exist_ok=True)  # Ensure directory exists
-        with open(markdown_filename, "w", encoding='utf-8') as f:
-            f.write(markdown_content)
-
-        print(f"!!! Markdown content from {site} saved successfully.")
-
-        # Ensure the directories exist before saving DOCX
-        output_filename = f"articles/docx/{site}/[{current_datetime}] {title}.docx"
-
-        os.makedirs(os.path.dirname(output_filename), exist_ok=True)  # Ensure directory exists
-
-        # Convert Markdown string to DOCX
-        pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
-
-        print(f"!!! Content for {site} article saved as DOCX successfully.")
+        # Save the article in the appropriate folder
+        save_article(link, title, has_date_tag, site)
     else:
         print(f"NO ARTICLE FOUND: {site}")
