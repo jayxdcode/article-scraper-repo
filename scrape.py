@@ -164,7 +164,7 @@ for site, link in latest_articles.items():
         markdown_content = f"# {title}\n\n{link}\n\n\n\n{article_content}"
 
         # Save the article content to a markdown file
-        markdown_filename = f"articles/docx/{site}/[{datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime('%Y%m%d')}] {title}.docx"  # Save directly to articles folder
+        markdown_filename = f"articles/docx/{site}/[{datetime.now(timezone(datetime.timedelta(hours=8))).strftime('%Y%m%d')}] {title}.docx"  # Save directly to articles folder
         os.makedirs(os.path.dirname(markdown_filename), exist_ok=True)  # Ensure directory exists
         with open(markdown_filename, "w", encoding='utf-8') as f:
             f.write(markdown_content)
@@ -172,7 +172,7 @@ for site, link in latest_articles.items():
         print(f"!!! Markdown content for {site} article saved successfully.")
 
         # Ensure the directories exist before saving DOCX
-        output_filename = f"articles/docx/{site}/[{datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime('%Y%m%d')}] {title}.docx"
+        output_filename = f"articles/docx/{site}/[{datetime.now(timezone(datetime.timedelta(hours=8))).strftime('%Y%m%d')}] {title}.docx"
 
         os.makedirs(os.path.dirname(output_filename), exist_ok=True)  # Ensure directory exists
 
