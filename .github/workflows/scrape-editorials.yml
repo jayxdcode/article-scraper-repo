@@ -13,6 +13,10 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
+    - name: Set Timezone to Asia/Manila
+      run: |
+        sudo timedatectl set-timezone Asia/Manila
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
