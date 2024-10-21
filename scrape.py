@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 import pypandoc
 import os
 
+current_datetime = datetime.now().strftime('%Y%m%d')
+
 # Verify timezone
 print(f"STARTING... CURRENT TIME: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
@@ -109,8 +111,13 @@ def extract_inquirer_content(article_url):
             elif tag.name == 'p':
                 article_content.append(tag.get_text())
 
-        filtered_content = article_content[:-2]  
-        filtered_content = filtered_content[:-3] + filtered_content[-2:]
+
+        filtered_content = [para for para in article_content if not para.startswith("")]
+        filtered_content = [para for para in filtered_content if not para.startswith("Subscribe to our daily newsletter")]
+        filtered_content = [para for para in filtered_content if not para.startswith("Subscribe to our newsletter!")]
+        filtered_content = [para for para in filtered_content if not para.startswith("We use cookies to enhance your experience. By continuing, you agree to our use of cookies. Learn more here.")]  
+        filtered_content = [para for para in filtered_content if not para.startswith("This is an information message")]
+        filtered_content = [para for para in filtered_content if not para.startswith("By providing an email address. I agree to the Terms of Use and acknowledge that I have read the Privacy Policy.")]
         filtered_content = [para for para in filtered_content if not para.startswith("By providing an email address.")]
         article_text = "\n\n".join(filtered_content)
 
@@ -154,7 +161,7 @@ latest_articles['Inquirer'] = get_latest_inquirer_article(urls['Inquirer'])
 # Extract and convert the article content
 for site, link in latest_articles.items():
     if link != "No article found":
-        print(f"!!! Extracting content for {site} article...")
+        print(f"!!! Extracting content from {site}...")
         if site == 'Inquirer':
             title, article_content = extract_inquirer_content(link)
         else:
@@ -169,10 +176,10 @@ for site, link in latest_articles.items():
         with open(markdown_filename, "w", encoding='utf-8') as f:
             f.write(markdown_content)
 
-        print(f"!!! Markdown content for {site} article saved successfully.")
+        print(f"!!! Markdown content from {site} saved successfully.")
 
         # Ensure the directories exist before saving DOCX
-        output_filename = f"articles/docx/{site}/[{datetime.now(timezone(timedelta(hours=8))).strftime('%Y%m%d')}] {title}.docx"
+        output_filename = f"articles/docx/{site}/[{current_datetime}] {title}.docx"
 
         os.makedirs(os.path.dirname(output_filename), exist_ok=True)  # Ensure directory exists
 
