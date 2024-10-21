@@ -1,60 +1,43 @@
-name: article-cleanup
+name: Delete Files/Folders
 
 on:
   workflow_dispatch:
     inputs:
-      favorite_word:
-        description: "What's your favorite word? [No wrong answers.]"
+      folder_to_delete:
+        description: 'Path of the folder to delete'
         required: true
-      confirmation:
-        description: "Type 'YES' to continue with the cleanup. CASE SENSITIVE!"
+      access_code:
+        description: 'Access code for cleanup'
         required: true
-      input_passcode:
-        description: "Input passcode for 2nd Level authorization."
-        required: true
+        type: string
 
 jobs:
-  validate_and_cleanup:
+  cleanup:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Validate and Perform Cleanup
-        run: |
-          # Get user inputs
-          favorite_word="${{ github.event.inputs.favorite_word }}"
-          confirmation="${{ github.event.inputs.confirmation }}"
-          input_passcode="${{ github.event.inputs.input_passcode }}"
-          secret_passcode="${{ secrets.CLEANUP_PASSCODE }}"
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-          # Echo the favorite word
-          echo
-          echo "Your favorite word is: $favorite_word"
-          echo
+    - name: Validate Access Code
+      run: |
+        if [ "${{ secrets.CLEANUP_PASSCODE }}" != "${{ github.event.inputs.access_code }}" ]; then
+          echo "Error: Invalid access code"
+          exit 1
+        fi
 
-          # Check confirmation
-          if [ "$confirmation" != 'YES' ]; then
-            echo "Cleanup canceled by user."
-            exit 1
-          fi
-
-          # Check passcode
-          if [ "$input_passcode" != "$secret_passcode" ]; then
-            echo "Incorrect passcode. Exiting workflow."
-            exit 1
-          else
-            echo "Action authorized. Proceeding with cleanup. DO NOT SHARE THE PASSCODE!"
-          fi
-
-          # Check for 'articles' folder and perform cleanup operations
-          echo "Performing cleanup operations..."
-          sleep 1
-          echo "Finding 'articles/' folder..."
-
-          # Check if the 'articles' folder exists in the current directory
-          if [ -d "articles" ]; then
-            echo "Folder exists. Proceeding with the clean up."
-            rm -rf articles/*
-            echo "Clean up successful!"
-          else
-            echo "Folder doesn't exist. Exiting the workflow..."
-            exit 1
-          fi
+    - name: Delete folder
+      run: |
+        folder="${{ github.event.inputs.folder_to_delete }}"
+        if [ -d "$folder" ] || [ -f "$folder" ]; then
+          echo "Deleting folder or file: $folder"
+          rm -rf "$folder"
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git add -A
+          git commit -m "Deleted $folder"
+          git push
+        else
+          echo "Error: Folder or file '$folder' does not exist"
+          exit 1
+        fi
