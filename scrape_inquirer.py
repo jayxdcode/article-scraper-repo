@@ -4,6 +4,8 @@ import pypandoc
 import os
 from datetime import datetime
 
+site = "Inquirer"
+
 # URL of the Inquirer opinion section
 inquirer_url = "https://opinion.inquirer.net"
 
@@ -67,15 +69,11 @@ def save_article(article_url, title, has_date_tag, site):
     markdown_content = f"# {title}\n\n{article_url}\n\n\n\n{article_content}"
 
     # Determine the correct directory based on whether the article has a date tag or not
-    if has_date_tag:
-        markdown_dir = f"articles/md/{site}/"
-        docx_dir = f"articles/docx/{site}/"
-    else:
-        markdown_dir = "articles/tps-top/md/"
-        docx_dir = "articles/tps-top/docx/"
+    markdown_dir = f"articles/md/{site}/"
+    docx_dir = f"articles/docx/{site}/"
 
     # Save Markdown content with date prefix
-    markdown_filename = f"{markdown_dir}{date_prefix}_{title}.md"
+    markdown_filename = f"{markdown_dir}[{date_prefix}] {title}.md"
     os.makedirs(os.path.dirname(markdown_filename), exist_ok=True)  # Ensure directory exists
     with open(markdown_filename, "w", encoding='utf-8') as f:
         f.write(markdown_content)
@@ -83,17 +81,11 @@ def save_article(article_url, title, has_date_tag, site):
     print(f"!!! Markdown content saved as {markdown_filename} successfully.")
 
     # Convert Markdown string to DOCX and save
-    output_filename = f"{docx_dir}{date_prefix}_{title}.docx"
+    output_filename = f"{docx_dir}[{date_prefix}] {title}.docx"
     os.makedirs(os.path.dirname(output_filename), exist_ok=True)  # Ensure directory exists
     pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
 
     print(f"!!! Content saved as {output_filename} successfully.")
-
-# Function to list files in a directory
-def list_saved_files():
-    for root, dirs, files in os.walk("articles"):
-        for file in files:
-            print(os.path.join(root, file))
 
 # Scrape the article from Inquirer
 latest_article_link, has_date_tag = get_latest_inquirer_article(inquirer_url)

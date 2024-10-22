@@ -14,14 +14,14 @@ def extract_philstar_content(article_url):
         soup = BeautifulSoup(response.content, 'html.parser')
         title = soup.title.string.strip()  # Adjust this according to the actual title tag
         content_tags = soup.find('div', class_='article__content').find_all('p')  # Adjust according to the actual content tag
-        content = "\n".join([tag.get_text(strip=True) for tag in content_tags])
+        content = "\n\n".join([tag.get_text(strip=True) for tag in content_tags])
         return title, content
     return None, None
 
 # Function to save article as markdown and docx
 def save_article(url, title, content, save_path):
     date_prefix = datetime.now().strftime("%Y%m%d")
-    safe_title = title.replace(' ', '_').replace('/', '_')
+    safe_title = title.replace('/', '_')
 
     # Ensure the directory exists
     os.makedirs(save_path, exist_ok=True)
@@ -38,7 +38,7 @@ def save_article(url, title, content, save_path):
 
 # Function to convert Markdown to DOCX
 def convert_md_to_docx(md_file_path, save_path, date_prefix, safe_title):
-    docx_file_path = os.path.join(save_path, f"{date_prefix}_{safe_title}.docx")
+    docx_file_path = os.path.join(save_path, f"[{date_prefix}] {safe_title}.docx")
     
     try:
         pypandoc.convert_file(md_file_path, 'docx', outputfile=docx_file_path)
@@ -84,22 +84,13 @@ def get_latest_philstar_article(url):
             print(f"!!! Latest article found on Philstar: {article_url}")
             title, content = extract_philstar_content(article_url)
             if title and content:
-                save_article(article_url, title, content, 'articles/tps-latest/md')
-                save_article(article_url, title, content, 'articles/tps-latest/docx')
+                save_article(article_url, title, content, 'articles/md/Philstar')
+                save_article(article_url, title, content, 'articles/docx/Philstar')
         else:
             print("### No recent article found on Philstar.")
     else:
         print(f"### Failed to fetch Philstar page. Status code: {response.status_code}")
 
-# Function to print all saved files
-def print_saved_files(directory):
-    print("\n!!! Saved files:")
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            print(os.path.join(root, file))
 
 # Fetch and save the latest Philstar article
 get_latest_philstar_article(philstar_url)
-
-# Print all saved files
-print_saved_files('articles/')
