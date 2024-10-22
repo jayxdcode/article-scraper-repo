@@ -30,13 +30,17 @@ jobs:
     - name: Install Pandoc
       run: sudo apt-get install -y pandoc
 
-    - name: Scrape Philstar and Inquirer Editorials
+    - name: Scrape Philstar Editorials
       run: |
+        echo "Running Philstar scraper..."
         python scrape_philstar.py
-        echo
-        printf '%.0s-' {1..15}
-        echo
+        echo "Philstar scraping completed."
+
+    - name: Scrape Inquirer Editorials
+      run: |
+        echo "Running Inquirer scraper..."
         python scrape_inquirer.py
+        echo "Inquirer scraping completed."
 
     - name: Commit Editorials
       run: |
