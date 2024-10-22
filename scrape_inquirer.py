@@ -55,9 +55,8 @@ def extract_inquirer_content(article_url):
                 paragraph_text = tag.get_text()
                 # Filter out unwanted paragraphs
                 if "Subscribe to our daily newsletter" in paragraph_text or \
-                   "Subscribe to our newsletter!" in paragraph_text:
-                  or \
-                   "By providing an email address. I agree to the Terms of Use and acknowledge that I have read the Privacy Policy."
+                   "Subscribe to our newsletter!" in paragraph_text or \
+                   "By providing an email address. I agree to the Terms of Use and acknowledge that I have read the Privacy Policy." in paragraph_text:
                     continue
                 article_content.append(paragraph_text)
 
