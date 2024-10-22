@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import pypandoc
 import os
+from datetime import datetime
 
 # URL of the Inquirer opinion section
 inquirer_url = "https://opinion.inquirer.net"
@@ -60,6 +61,7 @@ def extract_inquirer_content(article_url):
 # Function to save article as markdown and docx
 def save_article(article_url, title, has_date_tag, site):
     article_content = extract_inquirer_content(article_url)[1]  # Get article content only
+    date_prefix = datetime.now().strftime("%Y%m%d")
 
     # Combine title, link, and article content into a single Markdown string
     markdown_content = f"# {title}\n\n{article_url}\n\n\n\n{article_content}"
@@ -72,20 +74,26 @@ def save_article(article_url, title, has_date_tag, site):
         markdown_dir = "articles/tps-top/md/"
         docx_dir = "articles/tps-top/docx/"
 
-    # Save Markdown content
-    markdown_filename = f"{markdown_dir}{title}.md"
+    # Save Markdown content with date prefix
+    markdown_filename = f"{markdown_dir}{date_prefix}_{title}.md"
     os.makedirs(os.path.dirname(markdown_filename), exist_ok=True)  # Ensure directory exists
     with open(markdown_filename, "w", encoding='utf-8') as f:
         f.write(markdown_content)
 
-    print(f"!!! Markdown content saved as {title}.md successfully.")
+    print(f"!!! Markdown content saved as {markdown_filename} successfully.")
 
     # Convert Markdown string to DOCX and save
-    output_filename = f"{docx_dir}{title}.docx"
+    output_filename = f"{docx_dir}{date_prefix}_{title}.docx"
     os.makedirs(os.path.dirname(output_filename), exist_ok=True)  # Ensure directory exists
     pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
 
-    print(f"!!! Content saved as {title}.docx successfully.")
+    print(f"!!! Content saved as {output_filename} successfully.")
+
+# Function to list files in a directory
+def list_saved_files():
+    for root, dirs, files in os.walk("articles"):
+        for file in files:
+            print(os.path.join(root, file))
 
 # Scrape the article from Inquirer
 latest_article_link, has_date_tag = get_latest_inquirer_article(inquirer_url)
@@ -93,5 +101,6 @@ if latest_article_link != "### No article found":
     print(f"!!! Extracting content from Inquirer...")
     title, article_content = extract_inquirer_content(latest_article_link)
     save_article(latest_article_link, title, has_date_tag, "Inquirer")
+    list_saved_files()
 else:
     print("NO ARTICLE FOUND: Inquirer")
