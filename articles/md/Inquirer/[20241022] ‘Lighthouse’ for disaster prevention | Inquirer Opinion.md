@@ -54,14 +54,6 @@ Unfortunately, while LGUs routinely use QRF in response to typhoons, earthquakes
 
 Oxfam said part of the problem lay in LGUs growing used to a “reactive type of spending,” as well as a “fear of disallowance” from the Commission on Audit. “This is the reason for the year-on-year accumulation of special trust funds from the LDRRMF—an ironic situation for a country visited by an average of 20 typhoons a year,” Oxfam said.
 
-Subscribe to our daily newsletter
-
-By providing an email address. I agree to the Terms of Use and acknowledge that I have read the Privacy Policy.
-
 There are, of course, outliers, as several LGUs have taken anticipatory actions before disaster. For example, early cash transfers allowed towns in Eastern Samar and Mindanao to distribute groceries, medicines, and water to families days before Typhoon “Odette” hit in 2021. Still, the problem of agencies being unable to tap disaster funds persists. In a country ranked as the most vulnerable to extreme natural events and negative climate change impacts in the 2024 World Risk Report, this is a failure of governance for which both the legislative and executive branches must work together to find solutions.
 
 As a so-called lighthouse for disaster risk reduction, the Philippines must light the way for its people not only to survive but avoid calamity before it strikes. Time is of the essence, for the cost of government inaction may well be paid in lives.
-
-Subscribe to our newsletter!
-
-By providing an email address. I agree to the Terms of Use and acknowledge that I have read the Privacy Policy.
