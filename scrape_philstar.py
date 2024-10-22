@@ -28,7 +28,7 @@ def save_article(url, title, content, md_save_path, docx_save_path):
     os.makedirs(docx_save_path, exist_ok=True)
 
     # Save title and content to a markdown file
-    md_file_path = os.path.join(md_save_path, f"{date_prefix}_{safe_title}.md")
+    md_file_path = os.path.join(md_save_path, f"[{date_prefix}] {safe_title}.md")
     with open(md_file_path, 'w', encoding='utf-8') as file:
         file.write(f"# {title}\n\n[Read more here]({url})\n\n{content}")
 
