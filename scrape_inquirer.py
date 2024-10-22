@@ -93,6 +93,5 @@ if latest_article_link != "### No article found":
     print(f"!!! Extracting content from Inquirer...")
     title, article_content = extract_inquirer_content(latest_article_link)
     save_article(latest_article_link, title, has_date_tag, "Inquirer")
-    list_saved_files()
 else:
     print("NO ARTICLE FOUND: Inquirer")
