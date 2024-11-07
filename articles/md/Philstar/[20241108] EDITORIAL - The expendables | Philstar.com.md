@@ -1,0 +1,13 @@
+# EDITORIAL - The expendables | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2024/11/08/2398470/editorial-expendables)
+
+Watching a Filipino worker being slapped around by the former spokesman of the Presidential Anti-Organized Crime Commission is disturbing. Seeing Winston John Casio almost bragging about physically assaulting the man who worked as a janitor is equally distressing. At least the PAOCC was appalled enough to sack Casio. It’s unclear, however, if his relief is merely temporary.
+
+People are wondering if Casio would have dared slap around the janitor if the man has a higher status in life and can afford a topnotch lawyer. The incident occurred during a controversial raid conducted by the PAOCC in Bagac, Bataan on Central One, a business process outsourcing company that the PAOCC suspects to be an illegal Philippine offshore gaming operator firm. Central One has denied operating as a POGO.
+
+Casio explained that he lost his temper because during the PAOCC operation on Oct. 31, the janitor hurled invectives and flashed the dirty finger at the raiding team. Casio said in a radio interview that he gave the worker a choice between being slapped with a criminal case for unjust vexation, or being given a double “husband and wife” slap. Surrounded by PAOCC agents, the janitor pleaded not to be indicted, so he was slapped twice. For good measure, Casio said he gave the janitor a third “grandchild” slap.
+
+Perhaps the janitor should be thankful that he didn’t get “neutralized” by the PAOCC team. But slapping can constitute slander by deed, and the criminal offense is aggravated when committed by a public official. Casio’s flippant attitude in discussing the slaps changed and he became apologetic only when he was sacked as PAOCC spokesman. As PAOCC executive director Gilbert Cruz pointed out, nothing authorizes law enforcers to give people a choice between facing a criminal indictment or getting slapped around or beaten up.
+
+The incident highlights once again the double standard in imposing discipline and enforcing the law in this country. A janitor who gives lawmen the dirty finger is slapped three times by an agent of the law. A passenger of a luxury Cadillac Escalade bearing a senator’s protocol plate, which illegally enters the EDSA busway and nearly runs over a traffic enforcer, gives the enforcers the dirty finger. But the passenger remains unidentified to this day, with only the driver made to take the full blame. Such is justice for those deemed to be expendable in this country.
