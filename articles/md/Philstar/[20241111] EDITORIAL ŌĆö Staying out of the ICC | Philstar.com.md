@@ -1,0 +1,15 @@
+# EDITORIAL ŌĆö Staying out of the ICC | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2024/11/11/2399204/editorial-staying-out-icc)
+
+A year ago this month, President Marcos said the return of the country to the International Criminal Court was “under study.” The nation awaits his final decision on rejoining the ICC, from which the Philippines withdrew in 2019 when Rodrigo Duterte was president.
+
+Last month, Executive Secretary Lucas Bersamin said the country was not returning to the ICC. Bersamin told reporters that the President was not expected to change his mind on the issue, and the government would not forward to the ICC the findings of the congressional inquiries into Duterte’s war on drugs. Bersamin, however, has been refuted previously in his statements, the latest by Defense Secretary Gilbert Teodoro over Chinese aggression in Ayungin Shoal. So the public is still waiting for the President’s final word on rejoining the ICC.
+
+If Bersamin read Marcos accurately and the final decision is to keep the country out of the ICC, the President should instruct the Department of Justice and the Office of the Solicitor General to move quickly to show the world why the Philippines does not need outside help in unearthing abuses committed in the crackdown on illegal drugs, and punishing those responsible.
+
+This will be a landmark case in the application of Republic Act 9851, the 2009 Philippine Act on Crimes Against International Humanitarian Law, Genocide and Other Crimes Against Humanity. RA 9851 provides no prescription for the offenses, which carry the heaviest penalty of life in prison. It specifically states that no public official will be exempted from accountability, including the head of state or government. Superiors will be held responsible, and merely following orders from a superior – a common excuse in the police and military – will not automatically relieve a person of criminal responsibility.
+
+Application of RA 9851 will be guided by international agreements including the 1948 Genocide Convention and the 1949 Geneva Conventions with additional protocols. The law mandates regional trial courts to handle cases involving RA 9851. But because of the issues involved, and the possibility that a former president and his top aides may be the principal defendants, the Philippine government may have to create a special court to handle the case.
+
+This presumes that the case will hurdle preliminary investigation by government prosecutors and proceed to trial. By most accounts, the ICC is already far along in its probe, and has accessed the transcripts of the inquiries conducted separately by the Senate Blue Ribbon subcommittee and the quad committee of the House of Representatives. If President Marcos has decided against bringing the country back to the ICC, a credible domestic prosecution will be the best explanation for his decision.
