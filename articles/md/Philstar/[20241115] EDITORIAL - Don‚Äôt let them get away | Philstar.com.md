@@ -1,0 +1,11 @@
+# EDITORIAL - Don‚Äôt let them get away | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2024/11/15/2400287/editorial-dont-let-them-get-away)
+
+The National Bureau of Investigation has summoned former Philippine Charity Sweepstakes Office general manager Royina Garma for the revival of a probe into the murder of former PCSO board secretary Wesley Barayuga in July 2020 in Mandaluyong. A witness had told the quad committee of the House of Representatives that Garma, who retired as a police colonel to head the PCSO, ordered the hit to silence Barayuga, who was reportedly set to disclose corruption in the agency.
+
+Garma is still awaiting deportation from the United States. She had flown to the US with her daughter following her release from House detention after the All Saints Day break. With no criminal charges filed against her, and no request from any agency to prevent her departure or even put her under immigration lookout, Garma was free to leave the country. Unfortunately for her, the US had canceled her visa apparently over human rights issues, and denied her entry.
+
+In sworn testimonies at the quad comm and the Senate, several other former and incumbent public officials have been implicated in various criminal acts, some of them heinous, in connection with the bloody crackdown on illegal drugs. Without a formal investigation, they will also be free, like Garma, to leave the country. The government must not leave it up to the International Criminal Court to begin their formal investigation. Even a convict facing life in prison, former police superintendent Rafael Dumlao III, has probably also left the country after the Court of Appeals reversed his acquittal last July for the gangland-style execution of South Korean businessman Jee Ick-joo right inside Camp Crame.
+
+As expelled Negros Oriental congressman Arnolfo Teves has shown, it can be a struggle to get custody of a wanted person once he has left the country. At the congressional inquiries, it’s not enough that people are testifying under oath about grisly crimes committed. Authorities must also move to ensure that those implicated will not be able to escape prosecution.
