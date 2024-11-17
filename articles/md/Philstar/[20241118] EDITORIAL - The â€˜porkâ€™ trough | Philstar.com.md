@@ -1,0 +1,15 @@
+# EDITORIAL - The â€˜porkâ€™ trough | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2024/11/18/2400959/editorial-pork-trough)
+
+The Supreme Court has restrained the national government from impounding P89.9 billion in so-called excess funds of the Philippine Health Insurance Corp. The PhilHealth funds are supposed to go to a pool from all government-owned and controlled corporations or GOCCs that lawmakers can tap to finance the latest incarnation of their pork barrel, the unprogrammed appropriations.
+
+Yet the unprogrammed appropriations in the proposed General Appropriations Act for next year keep growing, jumping to P164 billion by end-October, raising the proposed 2025 GAA to P5.932 trillion. Unprogrammed appropriations, meant for additional obligations of government agencies, are supposed to be funded only if revenue collections exceed targets or if additional foreign funds or grants are generated.
+
+Last year, the bicameral conference committee inserted a whopping P449.5 billion to the P281.9 billion proposed by the national government for unprogrammed appropriations under the GAA for 2024. Little wonder that the bicam had to impound billions from PhilHealth and other GOCCs to finance their pet projects. The lawmakers inserted in the budget bill a provision, allowing the national government to declare as savings or excess the unutilized funds of all GOCCs.
+
+Finance Secretary Ralph Recto, a former lawmaker, described the P89.9 billion as unused government subsidy to PhilHealth. On May 10, PhilHealth was compelled to transfer the first tranche of P20 billion to the national treasury, despite strong opposition voiced by the country’s biggest medical groups, former finance officials, former SC senior associate justice Antonio Carpio and several lawmakers led by Senate Minority Leader Koko Pimentel. Another P10 billion was transferred on Aug. 21. On Oct. 29, the Supreme Court, which seemed to be taking its sweet time tackling the issue, finally acted on urgent petitions and issued a temporary restraining order, stopping further transfers of what was left of the “excess” PhilHealth funds.
+
+Opponents argue that the authority to impound the PhilHealth funds is a “rider” introduced in the GAA at the bicam level that illegally amended all laws separately creating each GOCC. They also stress that the impounding violates the Universal Health Care Act, which mandates that in case PhilHealth incurs excess funds, these must be used for only two purposes: to cut member premiums or expand health insurance coverage.
+
+It boggles the mind of ordinary people that PhilHealth has excess funds in any form. If the insurer failed to utilize any government subsidy, its head must be replaced for inefficiency. As for the incorrigible lawmakers who can’t get enough of “pork” at taxpayers’ expense, people can express their displeasure at the 2025 polls.
