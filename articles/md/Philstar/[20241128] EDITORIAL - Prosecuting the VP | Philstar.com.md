@@ -1,0 +1,15 @@
+# EDITORIAL - Prosecuting the VP | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2024/11/28/2403440/editorial-prosecuting-vp)
+
+Criminal charges were filed yesterday – and counter-charges are expected to be filed – as the feud continued to heat up between the clans of the two highest officials in the land.
+
+For the first time, an incumbent Vice President and key members of her security contingent face criminal complaints for direct assault, grave coercion and disobedience to an agent of a person in authority. The cases were filed against Sara Duterte by the Quezon City Police District after the commander of the Vice Presidential Security and Protection Group, Col. Raymund Lachica, reportedly pushed and assaulted a doctor of the Philippine National Police who was assisting in the transfer of Duterte’s chief of staff Zuleika Lopez from the House of Representatives detention facility to the Veterans Memorial Medical Center.
+
+In addition, Duterte faces two disbarment complaints filed with the Supreme Court. One case, filed by an anonymous complainant, was over her statement that if the administration would not stop harassing her, she would exhume the remains of former president Ferdinand Marcos from the Libingan ng mga Bayani and toss these into the West Philippine Sea. The second disbarment complaint, filed by the presidential adviser on poverty alleviation who himself has been disbarred by the SC, is over the Vice President’s revelation that if she is murdered, she had contracted a hitman for a revenge assassination of President Marcos, his wife Liza and his cousin Speaker Martin Romualdez.
+
+With the nation being reminded that a sitting vice president can be removed only by impeachment but does not enjoy immunity from suit, it looks like Vice President Duterte is seeing just the start of a long string of criminal complaints related to her statements in recent months. Lachica has been pulled out as commander of the Vice President’s security team and faces a criminal complaint for qualified direct assault on the PNP doctor.
+
+Duterte says her camp is readying counter-charges against the PNP. Zuleika Lopez is also set to challenge before the Supreme Court her detention for contempt as well as question the limits of the contempt powers of Congress.
+
+Even as the feuding camps swap charges, authorities must ensure that the legal and perhaps constitutional issues are resolved as quickly as possible. This political battle is projecting an image of national instability that can drive away business and tourism at a time when neighboring countries are aggressively moving to attract more visitors and investors. With the warring camps swapping charges, the nation must show that Philippine justice is truly blind and its legal system is fully functional, efficient and credible.
