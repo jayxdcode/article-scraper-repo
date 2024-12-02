@@ -1,0 +1,15 @@
+# EDITORIALâ€” Impeaching the VP | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2024/12/03/2404581/editorial-impeaching-vp)
+
+As Vice President Sara Duterte expected, an impeachment complaint was filed against her yesterday. The landmark complaint was filed by various sectoral groups as well as relatives of several victims of drug killings, and endorsed by Akbayan party-list Rep. Perci Cendaña.
+
+These are groups and persons who are not expected to heed what congressmen have described as an appeal by President Marcos to his House allies not to waste time in impeaching the Vice President. Marcos, acknowledging that he sent the message, explained that Duterte’s impeachment would distract the House and the Senate from pressing matters and would not benefit any Filipino.
+
+Those who filed the impeachment complaint obviously disagree, believing that the Vice President deserves to be ousted for offenses that fall under key categories including culpable violation of the Constitution, betrayal of public trust, corruption and bribery. They also point out that the legislature is supposed to be an independent branch of government and cannot be ordered around by the executive. Certain congressmen also said they did not see Marcos’ message as a marching order to his allies led by his cousin, Speaker Martin Romualdez, but merely an opinion and appeal.
+
+Impeachment in this country, as the public has seen, is a political process. If the super majority in the House of Representatives would flex its muscles, it could vote overwhelmingly in favor of an impeachment complaint and forward the articles of impeachment ASAP to the Senate for trial. But this would reinforce accusations that the chamber is merely engaged in a partisan act whose aim is to eliminate Duterte from the presidential race in 2028 and give Marcos’ preferred successor a better chance.
+
+The country has seen a president tried by impeachment, although Joseph Estrada was ousted through people power. Renato Corona was ousted as chief justice after conviction by the impeachment court. Merceditas Gutierrez narrowly avoided ouster by impeachment, and thus got to keep her retirement benefits as ombudsman. Last year, she even bagged a seat as a member of the board of trustees of the Government Service Insurance System.
+
+Sara Duterte has become the first vice president to face an impeachment complaint. As several congressmen have pointed out, acting on a verified impeachment complaint is not discretionary on their part but their constitutional duty. Part of this duty is to strictly follow the rules and accord the subject of impeachment due process. It will be the best way to prevent the process – no matter how political it can be – from creating instability in the country. The process should project the strength rather than weakness of Philippine institutions.
