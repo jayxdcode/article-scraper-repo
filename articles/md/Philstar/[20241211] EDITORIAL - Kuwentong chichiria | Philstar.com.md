@@ -1,0 +1,15 @@
+# EDITORIAL - Kuwentong chichiria | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2024/12/11/2406504/editorial-kuwentong-chichiria)
+
+People snickered when President Marcos lamented that instead of answering valid questions about public fund utilization, the issue was diverted to cheap talk or “kwentong chichiria.” It was his comment on the expletive-laced tirade of Vice President Sara Duterte against him, his wife Liza and cousin Speaker Martin Romualdez.
+
+The chichiria or snacks being alluded to, however, are no laughing matter. Acknowledgment receipts for confidential fund disbursements of the Office of the Vice President bore signatures of a person named Mary Grace Piattos – apparently a combination of the brand names of a local café and packaged potato chips. The OVP submitted the receipts to the Commission on Audit to explain how the office spent P500 million in confidential funds from December 2022 up to the third quarter of 2023, with P125 million used in just 11 days in 2022. Of the P125 million, the COA flagged disbursements amounting to P73 million as inappropriate or irregular.
+
+The Philippine Statistics Authority, upon the request of the House committee on good government, checked and found that “Mary Grace Piattos” does not exist in the nation’s civil registry. Apart from Mary Grace Piattos, the PSA verified that 405 of 677 names used in confidential fund disbursements of the Department of Education when Sara Duterte was the DepEd secretary were not listed in the Civil Registry System. Since it’s unlikely that all 405 people authorized to sign DepEd receipts were not registered at birth, there is basis to describe the signatories as “non-existent” people and their signatures fraudulent.
+
+Last Monday, the PSA was asked by the House good government committee to verify 1,992 signatories of acknowledgment receipts for confidential fund disbursements of the OVP. The House panel began seeking PSA verification after noticing irregularities in the signatures and similarities in the handwriting of different fund recipients. If the pattern in the DepEd is any indication, many of those 1,992 signatories may also be classified as “non-existent.”
+
+The question is how widespread this practice is in the utilization of confidential and intelligence funds, in both national and local government agencies. The CIF is confidential in nature, but COA officials have pointed out that this is not tantamount to full secrecy and lack of accountability in the utilization of the funds. Even the CIF, to a certain extent, is subject to state auditing.
+
+The House committee is wrapping up its probe focusing on the Vice President, who says the inquiry is politicized. The Marcos administration and the COA can dispel the accusation by showing that the CIF scrutiny is not selective, and will cover other government agencies. Who knows how many more kuwentong chichiria will be unearthed?
