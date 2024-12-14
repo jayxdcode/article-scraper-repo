@@ -1,0 +1,13 @@
+# EDITORIAL ŌĆö ŌĆśWorld-classŌĆÖ AFP | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2024/12/15/2407530/editorial-world-class-afp)
+
+From aiming for minimum credible defense capability, the government is now aspiring for a “world-class” Armed Forces of the Philippines. The AFP can only hope that this objective, announced by President Marcos, will soon go beyond aspiration.
+
+What the President and commander-in-chief meant by “world-class” is unclear. He also did not go into specifics on how he intended to attain his aspiration. There is no doubt, however, that the need to step up the country’s defense capability has gained urgency. These days, China is aggressively staking a claim over Philippine sovereign waters in contravention of international rules, using gray zone tactics to harass Philippine vessels and depriving Filipino fishermen of their livelihood.
+
+China refuses to play by the rules of the United Nations Convention on the Law of the Sea, to which it is a signatory like the Philippines. Based on UNCLOS, the Permanent Court of Arbitration in The Hague invalidated China’s claim over nearly the entire South China Sea. Beijing has rejected the ruling, and has instead used its coast guard, which is under its military command, along with militia ships to harass Philippine vessels. It has conducted massive reclamation activities that have destroyed the marine environment to create artificial islands fortified into military installations, including on Panganiban or Mischief Reef just 130 nautical miles from Palawan. The arbitral court ruled that the Philippines has sovereign rights over Mischief Reef.
+
+For decades, the Philippines had been under the security umbrella of its treaty ally the United States. This ended with the shutdown of US bases in the Philippines in 1991 and 1992. The Philippines was slow in building its own capability for external defense as the country focused on internal armed threats. Meanwhile, China began its massive artificial island building, starting with huts on Panganiban Reef that it claimed were merely shelters for fishermen.
+
+The Philippines cannot hope to match the military buildup of China, now the world’s second largest economy. But the Philippines will need to do more to protect its people and vessels from being blasted with powerful water cannons and hit with blinding lasers by Chinese gray zone forces in the West Philippine Sea. While support from allies and the global community is welcome, allies will also welcome the Philippines’ own efforts to boost its capability to defend itself. With political will and judicious allocation of resources, credible defense capability is attainable.
