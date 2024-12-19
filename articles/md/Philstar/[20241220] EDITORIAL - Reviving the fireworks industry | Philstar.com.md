@@ -1,0 +1,13 @@
+# EDITORIAL - Reviving the fireworks industry | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2024/12/20/2408604/editorial-reviving-fireworks-industry)
+
+For several years now, the fireworks industry has seen declining sales. This has been attributed to restrictions imposed on fireworks displays, which intensified during the presidency of Rodrigo Duterte and peaked during the COVID lockdowns. An aggressive campaign to encourage safe revelry, which includes the presentation of true stories about fatal accidents and serious injuries involving firecrackers, has also helped alter attitudes toward New Year celebrations.
+
+But the market for fireworks is still there, and is reportedly recovering following the lifting of all pandemic-related restrictions. The people whose livelihoods depend on the local fireworks industry, however, have been contending for several years now with stiff competition from imported products. This has been aggravated by the online sale not only of the imports, but also of powerful but prohibited firecrackers.
+
+Fireworks industry players are seeking government help in curbing the sale of the illegal items. The industry that is based mainly in Bulacan has been moving to ensure the safety of local products, and innovating to compete with the imports that provide spectacular fireworks displays. Legitimate players have stressed that they comply with the law regulating the industry, including specifications on quality control, but illegal operators are sabotaging efforts for the local fireworks industry to survive and thrive.
+
+The popularity of imported fireworks indicates the continuing appeal of the products. Worldwide, fireworks continue to be used not only to greet the New Year, but also for many other types of celebrations. What’s important is efficient regulation to ensure product quality and their safe use.
+
+With world-class products that can appeal to a bigger market, the fireworks makers of Bulacan need not worry about the use of their products being limited to common display areas in the Philippines. Given government support – in product development, credit access, safe logistics, marketing and other aspects – fireworks production can be developed into a job-generating export industry. Government support must include efforts to clamp down on the sale of illegal products. The government must decide whether it wants to see the end of the country’s fireworks industry, or revive it and help it thrive.
