@@ -1,0 +1,13 @@
+# EDITORIAL - Making the gun ban work | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2025/01/08/2412562/editorial-making-gun-ban-work)
+
+The election gun ban is set to start on Jan. 12. People whose work calls for possession of firearms, such as military and police officers, may apply for exemptions from the gun ban from the Commission on Elections. The Comelec must coordinate with the Philippine National Police and local governments to ensure better enforcement of the gun ban. The PNP, for its part, must also work with other agencies to monitor coastal areas including private ports for the possible smuggling of guns and ammunition.
+
+In every electoral exercise in this country, a gun ban is imposed. Yet deadly violence prevails, even in the races for the smallest units of government, the barangay. In 2023, the Comelec reported over a dozen people killed in connection with the barangay and Sangguniang Kabataan elections. Even more people – candidates and supporters alike – are killed in election-related violence during local and national races. Guns are the principal weapons used, which raises questions about the way the election gun ban is implemented.
+
+Comelec officials have said there is a continuing effort to dismantle private armed groups ahead of the elections. Whether the PAGs to be dismantled will include the security contingents of certain public officials remains to be seen. These security teams often include police and military personnel as well as armed civilians who function as so-called force multipliers. Such teams often serve as virtual private armies of the public officials to whom they are assigned.
+
+Even before the start of election periods, the PNP conducts random checks of motor vehicles across the country for guns and other weapons. Yet scores of people end up dead during election campaigns, indicating the need for greater effort and additional measures to curb gun violence.
+
+As important as cracking down on loose firearms is catching and punishing those behind armed violence. This is obviously a problem in places where the politicians who are in power deploy their private armies to harass or even kill their opponents. The failure to punish the perpetrators of election violence has bred impunity. It has perpetuated the mindset that murder is the most effective tool for eliminating election rivals. This mindset must be expunged and greater effort is needed to make the election gun ban work.
