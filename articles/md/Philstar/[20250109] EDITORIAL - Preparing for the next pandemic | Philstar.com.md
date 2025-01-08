@@ -1,0 +1,15 @@
+# EDITORIAL - Preparing for the next pandemic | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2025/01/09/2412828/editorial-preparing-next-pandemic)
+
+Are we ready for the next pandemic? Five years since the onset of COVID-19, the World Health Organization says the world is not. The official death toll from COVID, according to the WHO dashboard, stood at over seven million as of last December, with 2,307 deaths recorded in the 28 days to Dec. 22 alone. Experts believe the actual total is far higher.
+
+At the start of this year, health experts have warned that the arrival of the next pandemic is not a question of if but when. The destruction of wildlife habitats and globalization of travel have facilitated the emergence and continuing mutation of killer pathogens, some of them still with no known cure, and their rapid spread across the globe.
+
+Five years ago this month, the world watched with alarm as a new coronavirus began spreading. The first outbreak of severe acute respiratory syndrome coronavirus 2 was reported in December 2019 in China’s Wuhan City. By January 2020, SARS-CoV-2 was racing across the planet, including to the Philippines, where then president Rodrigo Duterte refused to close the borders to Chinese travelers for fear of offending Beijing.
+
+On Jan. 30, 2020, the WHO declared the outbreak of COVID-19 as a “public health emergency of international concern.” It took another month and a half, on March 11, before the WHO announced a COVID pandemic. By that time, the Philippines had recorded COVID deaths, with a 44-year-old Chinese tourist straight from Wuhan becoming the first COVID fatality outside China. His female companion, a 38-year-old Chinese woman, became COVID patient No. 1 in the Philippines, with her infection logged on Jan. 30.
+
+Have lessons been learned? Taiwan, which was kept out of the WHO information loop during the SARS outbreak in 2009, learned from its sad experience and was one of the best prepared for COVID-19. It distributed millions of free masks to its citizens as early as January 2020, upon getting wind of the Wuhan outbreak that Beijing tried to keep under wraps. Taiwan also imposed health safety protocols along with a highly efficient case tracking system that would become the global norm only months later.
+
+COVID exposed the acute inadequacy of public health care in the Philippines. The country had to scramble even for basic personal protective equipment for health workers and other frontline service personnel, from masks to protective clothing. Massive corruption complicated the government response. Today, the WHO is tracking outbreaks of HMPV or the Human Metapneumovirus, which is reportedly spreading in China. Before another killer virus enters the country, the Philippines must review its readiness for the next pandemic, and act accordingly.
