@@ -1,0 +1,15 @@
+# EDITORIAL â€” Kontra Bigay 2.0 | Philstar.com
+
+[Read more here](https://www.philstar.com/opinion/2025/02/08/2419988/editorial-kontra-bigay-20)
+
+With the election campaign officially starting this coming week, the Commission on Elections has launched anew its drive against the buy and sell of votes.
+
+“Kontra Bigay 2.0” implies improvements in carrying out the campaign that was first launched in October 2023 for the barangay and Sangguniang Kabataan elections. It should go beyond appeals by the Comelec to the public not to sell their votes, and not to vote for candidates who buy votes.
+
+The Comelec admonition is a departure from the advice of the late Manila Archbishop Jaime Cardinal Sin during the Marcos dictatorship: accept what candidates give, but don’t vote for them. The advice acknowledged the circumstances of many voters across the country. Comelec Chairman George Garcia, on the other hand, says acceptance of such “gifts” entrenches vote-buying, regardless of whether or not candidates get the outcome that they paid for. No one will give if no one will receive, Garcia argues.
+
+There are various ways of buying votes. Garcia points out that in many cases, what candidates use for buying votes come from state resources. Public awareness of this issue has intensified in recent weeks because of the uproar over the shameless reworking of the National Expenditure Program or NEP by senators and congressmen so that their election campaigns will be bankrolled by taxpayers. Lawmakers cut billions from the budgets of key sectors including education and health, and realigned the amounts to the Senate and the House, to their pork barrel and unconditional ayuda for which they claim credit in the distribution.
+
+Malacañang has been scrounging for sources of funds to make up for the budget cuts. The Department of Social Welfare and Development insists that only its personnel and not politicians can distribute the various forms of ayuda or dole-outs. These include the Ayuda sa Kapos ang Kita Program, which Congress inserted in the 2025 budget but was not part of the NEP, and the Assistance for Individuals in Crisis Situations, which includes the Malasakit health centers.  Ensuring that politicians stay out of the distribution of AKAP, AICS and other social services especially during the election period should be part of Kontra Bigay 2.0.
+
+The Comelec describes Kontra Bigay 2.0 as a campaign “against abuse of state resources, a silent but pervasive threat to the foundations of our democracy.” It should encourage public cooperation through widespread information about how to spot vote buying and selling, and the mechanisms for reporting those who engage in such illegal acts. The Comelec must show swift action on the reports, and a modicum of certainty that violators will face punishment.
