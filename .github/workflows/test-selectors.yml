@@ -66,7 +66,6 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const core = require('@actions/core');
             const path = require('path');
 
             const resultsPath = 'test_results.json';
