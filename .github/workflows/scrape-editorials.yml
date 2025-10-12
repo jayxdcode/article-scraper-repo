@@ -1,9 +1,9 @@
 name: Scrape Editorials
 
 on:
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:
   schedule:
-    - cron: '0 23 * * *'  # Scheduled trigger (runs at 11:00 PM UTC / 07:00 AM Philippine Time)
+    - cron: '0 23 * * *'  # Scheduled trigger (runs at 23:00 UTC / 07:00 AM Philippine Time)
 
 jobs:
   scrape:
@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: Set Timezone to Asia/Manila
       run: |
@@ -28,24 +30,36 @@ jobs:
         pip install requests beautifulsoup4 pypandoc
 
     - name: Install Pandoc
-      run: sudo apt-get install -y pandoc
+      run: sudo apt-get update && sudo apt-get install -y pandoc
 
-    - name: Scrape Philstar Editorials
+    - name: Run Philstar scraper (continue on error)
       run: |
         echo "Running Philstar scraper..."
-        python scrape_philstar.py
-        echo "Philstar scraping completed."
+        python scrape_philstar.py || true
 
-    - name: Scrape Inquirer Editorials
+    - name: Run Inquirer scraper (continue on error)
       run: |
         echo "Running Inquirer scraper..."
-        python scrape_inquirer.py
-        echo "Inquirer scraping completed."
+        python scrape_inquirer.py || true
 
-    - name: Commit Editorials
+    - name: Show status (debug)
+      run: |
+        echo "=== ls articles ==="
+        ls -R articles || true
+        echo "=== ls errors ==="
+        ls -R errors || true
+        echo "=== show logs ==="
+        ls -R logs || true
+
+    - name: Commit Editorials and Errors (if any)
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add articles/*
-        git commit -m "Updated Philstar and Inquirer editorials for $(date +'%b. %d, %Y (%a)')"
-        git push
+        git add -A articles errors || true
+        # only commit if there are changes
+        if ! git diff --cached --quiet; then
+          git commit -m "Update scraped editorials & errors: $(date +'%b. %d, %Y (%a)')"
+          git push
+        else
+          echo "No changes to commit."
+        fi
