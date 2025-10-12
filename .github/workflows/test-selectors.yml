@@ -30,7 +30,6 @@ jobs:
 
       - name: Run selector tests
         id: run_tests
-        # allow this step to fail so subsequent steps can run to commit artifacts and file issue
         continue-on-error: true
         run: |
           set -o pipefail
@@ -60,7 +59,7 @@ jobs:
             echo "No changes to commit."
           fi
 
-      - name: Create GitHub Issue for failures (if any)
+      - name: Create or update GitHub Issue for failures
         if: always()
         uses: actions/github-script@v6
         with:
@@ -81,11 +80,10 @@ jobs:
               return;
             }
 
-            const failedNames = failed.map(([k]) => k);
-            const title = `Selector test FAILED: ${failedNames.join(', ')}`;
-            let body = `Automated selector test run on **${results.generated_at}** detected failures for the following site(s):\n\n`;
             for (const [siteName, siteRes] of failed) {
-              body += `### ${siteName}\n\n`;
+              const title = `Selector test FAILED: ${siteName}`;
+              let body = `Automated selector test run on **${results.generated_at}** detected failures for **${siteName}**:\n\n`;
+
               if (siteRes.errors && siteRes.errors.length>0) {
                 body += `**Errors:**\n`;
                 for (const e of siteRes.errors.slice(0,20)) {
@@ -94,28 +92,57 @@ jobs:
               } else {
                 body += '- (no textual errors captured)\n';
               }
+
               // include most recent error file content (if present)
-              const errorFiles = fs.readdirSync('errors').filter(f => f.startsWith(siteName + '__')).sort().reverse();
-              if (errorFiles.length > 0) {
-                const ef = path.join('errors', errorFiles[0]);
-                let content = fs.readFileSync(ef, 'utf8');
-                if (content.length > 7000) content = content.slice(0,7000) + '\n\n...[truncated]';
-                body += `\n**Most recent error file (${errorFiles[0]}):**\n\n\`\`\`\n${content}\n\`\`\`\n\n`;
+              const errorsDir = 'errors';
+              if (fs.existsSync(errorsDir)) {
+                const errorFiles = fs.readdirSync(errorsDir).filter(f => f.startsWith(siteName + '__')).sort().reverse();
+                if (errorFiles.length > 0) {
+                  const ef = path.join(errorsDir, errorFiles[0]);
+                  let content = fs.readFileSync(ef, 'utf8');
+                  if (content.length > 7000) content = content.slice(0,7000) + '\n\n...[truncated]';
+                  body += `\n**Most recent error file (${errorFiles[0]}):**\n\n\`\`\`\n${content}\n\`\`\`\n\n`;
+                }
               }
+
               // include snapshot reference if available
-              const snapFiles = fs.readdirSync('snapshots').filter(f => f.startsWith(siteName + '__')).sort().reverse();
-              if (snapFiles.length > 0) {
-                body += `Snapshot saved: \`${snapFiles[0]}\` (committed to repo)\n\n`;
+              const snapDir = 'snapshots';
+              if (fs.existsSync(snapDir)) {
+                const snapFiles = fs.readdirSync(snapDir).filter(f => f.startsWith(siteName + '__')).sort().reverse();
+                if (snapFiles.length > 0) {
+                  body += `Snapshot saved: \`${snapFiles[0]}\` (committed to repo)\n\n`;
+                }
+              }
+
+              body += "\n---\n*This issue was created automatically by the selector test workflow.*";
+
+              // check for existing open issue
+              const { data: issues } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                labels: 'scraper-automated'
+              });
+
+              const existing = issues.find(i => i.title === title);
+
+              if (existing) {
+                core.info(`Updating existing issue: ${title}`);
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existing.number,
+                  body: body
+                });
+              } else {
+                core.info(`Creating new issue: ${title}`);
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: title,
+                  body: body,
+                  labels: ['scraper-automated'],
+                  assignees: ['jayxdcode']
+                });
               }
             }
-
-            body += "\n---\n*This issue was created automatically by the selector test workflow.*";
-
-            // create issue
-            await github.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title,
-              body
-            });
-            core.info(`Created issue: ${title}`);
