@@ -1,0 +1,122 @@
+name: Test Query Selectors
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 23 * * *'  # runs at 23:00 UTC (adjust if needed)
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Run selector tests
+        id: run_tests
+        # allow this step to fail so subsequent steps can run to commit artifacts and file issue
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python test_selectors.py
+          echo "exit_code=$?" > step_exit_code.txt
+
+      - name: Show artifacts (debug)
+        run: |
+          echo "=== errors ==="
+          ls -la errors || true
+          echo "=== snapshots ==="
+          ls -la snapshots || true
+          echo "=== results ==="
+          cat test_results.json || true
+
+      - name: Commit test results and artifacts (if any)
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add test_results.json || true
+          git add errors || true
+          git add snapshots || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Selector test artifacts: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || true
+            git push || true
+          else
+            echo "No changes to commit."
+          fi
+
+      - name: Create GitHub Issue for failures (if any)
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const core = require('@actions/core');
+            const path = require('path');
+
+            const resultsPath = 'test_results.json';
+            if (!fs.existsSync(resultsPath)) {
+              core.info('No test_results.json found; nothing to do.');
+              return;
+            }
+            const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+            const failed = Object.entries(results.sites || {}).filter(([k,v]) => v.ok === false);
+
+            if (failed.length === 0) {
+              core.info('No failing sites found — no issue will be created.');
+              return;
+            }
+
+            const failedNames = failed.map(([k]) => k);
+            const title = `Selector test FAILED: ${failedNames.join(', ')}`;
+            let body = `Automated selector test run on **${results.generated_at}** detected failures for the following site(s):\n\n`;
+            for (const [siteName, siteRes] of failed) {
+              body += `### ${siteName}\n\n`;
+              if (siteRes.errors && siteRes.errors.length>0) {
+                body += `**Errors:**\n`;
+                for (const e of siteRes.errors.slice(0,20)) {
+                  body += `- ${e}\n`;
+                }
+              } else {
+                body += '- (no textual errors captured)\n';
+              }
+              // include most recent error file content (if present)
+              const errorFiles = fs.readdirSync('errors').filter(f => f.startsWith(siteName + '__')).sort().reverse();
+              if (errorFiles.length > 0) {
+                const ef = path.join('errors', errorFiles[0]);
+                let content = fs.readFileSync(ef, 'utf8');
+                if (content.length > 7000) content = content.slice(0,7000) + '\n\n...[truncated]';
+                body += `\n**Most recent error file (${errorFiles[0]}):**\n\n\`\`\`\n${content}\n\`\`\`\n\n`;
+              }
+              // include snapshot reference if available
+              const snapFiles = fs.readdirSync('snapshots').filter(f => f.startsWith(siteName + '__')).sort().reverse();
+              if (snapFiles.length > 0) {
+                body += `Snapshot saved: \`${snapFiles[0]}\` (committed to repo)\n\n`;
+              }
+            }
+
+            body += "\n---\n*This issue was created automatically by the selector test workflow.*";
+
+            // create issue
+            await github.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body
+            });
+            core.info(`Created issue: ${title}`);
