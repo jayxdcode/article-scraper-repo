@@ -6,4 +6,4 @@ The plan is to integrate this as an API on other projects to automatically deliv
 
 site live at
 
-https://github-jl14.github.io/article-scraper-repo/
+https://jayxdcode.github.io/article-scraper-repo/
