@@ -1,0 +1,27 @@
+4{
+  "sites": [
+    {
+      "name": "Inquirer",
+      "listing_url": "https://opinion.inquirer.net",
+      "listing_selector": "div#opinion-v2-mh",
+      "link_selector": "a[href]",
+      "article_selectors": {
+        "title": "title",
+        "article_section": "section#inq_section",
+        "paragraphs": "section#inq_section p",
+        "headings": "section#inq_section h2"
+      }
+    },
+    {
+      "name": "Philstar",
+      "listing_url": "https://philstar.com/opinion",
+      "listing_selector": "div.carousel__item",
+      "link_selector": "a[href]",
+      "article_selectors": {
+        "title": "title",
+        "article_section": "div.article__content",
+        "paragraphs": "div.article__content p"
+      }
+    }
+  ]
+}
