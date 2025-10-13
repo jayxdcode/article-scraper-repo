@@ -1,0 +1,4 @@
+Failed to fetch article URL: https://opinion.inquirer.net/186700/the-senates-gambit
+
+Trace:
+NoneType: None
