@@ -1,14 +1,14 @@
 {
-  "generated_at": "2025-10-13T23:21:35.074754",
+  "generated_at": "2025-10-14T23:22:53.602659",
   "sites": {
     "Inquirer": {
       "ok": false,
       "errors": [
-        "Failed to fetch article URL: https://opinion.inquirer.net/186700/the-senates-gambit"
+        "Failed to fetch article URL: https://opinion.inquirer.net/186729/still-laden-with-pork"
       ],
       "details": {
         "listing_url": "https://opinion.inquirer.net",
-        "article_url": "https://opinion.inquirer.net/186700/the-senates-gambit"
+        "article_url": "https://opinion.inquirer.net/186729/still-laden-with-pork"
       }
     },
     "Philstar": {
@@ -16,7 +16,7 @@
       "errors": [],
       "details": {
         "listing_url": "https://philstar.com/opinion",
-        "article_url": "https://www.philstar.com/opinion/2025/10/13/2479405/editorial-auditing-breakdown",
+        "article_url": "https://www.philstar.com/opinion/2025/10/15/2479933/editorial-weapon-accountability",
         "article_selectors": {
           "title": {
             "selector": "title",
