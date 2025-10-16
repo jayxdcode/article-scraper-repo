@@ -1,14 +1,14 @@
 {
-  "generated_at": "2025-10-15T23:22:23.992584",
+  "generated_at": "2025-10-16T23:19:59.291379",
   "sites": {
     "Inquirer": {
       "ok": false,
       "errors": [
-        "Failed to fetch article URL: https://opinion.inquirer.net/186763/stark-lessons-from-pdaf-scam"
+        "Failed to fetch article URL: https://opinion.inquirer.net/186794/skewed-sense-of-entitlement"
       ],
       "details": {
         "listing_url": "https://opinion.inquirer.net",
-        "article_url": "https://opinion.inquirer.net/186763/stark-lessons-from-pdaf-scam"
+        "article_url": "https://opinion.inquirer.net/186794/skewed-sense-of-entitlement"
       }
     },
     "Philstar": {
@@ -16,7 +16,7 @@
       "errors": [],
       "details": {
         "listing_url": "https://philstar.com/opinion",
-        "article_url": "https://www.philstar.com/opinion/2025/10/16/2480128/editorial-no-state-witnesses",
+        "article_url": "https://www.philstar.com/opinion/2025/10/17/2480446/editorial-decaying-health-centers",
         "article_selectors": {
           "title": {
             "selector": "title",
@@ -28,7 +28,7 @@
           },
           "paragraphs": {
             "selector": "div.article__content p",
-            "count": 10
+            "count": 9
           }
         }
       }
