@@ -1,0 +1,20 @@
+Time: 2025-10-17T07:10:16.384917
+Exception: TypeError("'PosixPath' object is not iterable")
+
+Traceback:
+Traceback (most recent call last):
+  File "/home/runner/work/article-scraper-repo/article-scraper-repo/scrape_philstar.py", line 113, in save_article
+    pypandoc.convert_file(md_file_path, 'docx', outputfile=docx_file_path)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.13.7/x64/lib/python3.13/site-packages/pypandoc/__init__.py", line 206, in convert_file
+    return _convert_input(discovered_source_files, format, 'path', to, extra_args=extra_args,
+                      outputfile=outputfile, filters=filters,
+                      verify_format=verify_format, sandbox=sandbox,
+                      cworkdir=cworkdir, sort_files=sort_files)
+  File "/opt/hostedtoolcache/Python/3.13.7/x64/lib/python3.13/site-packages/pypandoc/__init__.py", line 387, in _convert_input
+    input_file = sorted(input_file)
+TypeError: 'PosixPath' object is not iterable
+
+
+Extra:
+md_file=articles/md/Philstar/[20251017] EDITORIAL - Decaying  health centers | Philstar.com.md
