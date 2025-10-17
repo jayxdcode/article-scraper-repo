@@ -1,4 +1,4 @@
-name: Scraper - Test
+Name: Scraper - Test
 
 on:
   workflow_dispatch:
@@ -55,6 +55,8 @@ jobs:
           BRANCH="${GITHUB_REF#refs/heads/}"
           git push origin HEAD:$BRANCH
 
+---
+
   run-tests:
     needs: ensure-lockfile
     runs-on: ubuntu-latest
@@ -67,10 +69,19 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Cache Node Modules
+        id: cache-node-modules
+        uses: actions/cache@v4.3.0
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install deps
         run: |
-          # If a lockfile exists, prefer deterministic install
-          if [ -f package-lock.json ]; then
+          # If cache miss (node_modules doesn't exist) or lockfile is present, run npm ci
+          if [ ! -d "node_modules" ] || [ -f package-lock.json ]; then
             npm ci
           else
             npm install
