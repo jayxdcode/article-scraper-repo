@@ -1,4 +1,4 @@
-Name: Scraper - Test
+name: Scraper - Test
 
 on:
   workflow_dispatch:
@@ -53,9 +53,11 @@ jobs:
           git commit -m "chore(ci): add package-lock.json" || echo "No changes to commit"
           # push back to the branch that triggered the workflow
           BRANCH="${GITHUB_REF#refs/heads/}"
-          git push origin HEAD:$BRANCH
-
----
+          if [ -z "$BRANCH" ] || [ "$BRANCH" = "$GITHUB_REF" ]; then
+            # fallback to current branch name if GITHUB_REF is not a heads ref
+            BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          fi
+          git push origin HEAD:"$BRANCH"
 
   run-tests:
     needs: ensure-lockfile
@@ -74,7 +76,7 @@ jobs:
         uses: actions/cache@v4.3.0
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json','package.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
