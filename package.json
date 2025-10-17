@@ -1,0 +1,22 @@
+{
+  "name": "article-scraper-node",
+  "version": "1.0.0",
+  "description": "Site-specific Puppeteer scrapers (Inquirer + Philstar) with tests and CI workflows",
+  "main": "node/test/test-runner.js",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "scrape:inquirer": "node node/inquirer/scrape-inquirer.js",
+    "scrape:philstar": "node node/philstar/scrape-philstar.js",
+    "scrape:all": "npm run scrape:inquirer && npm run scrape:philstar",
+    "test": "node node/test/test-runner.js"
+  },
+  "dependencies": {
+    "fs-extra": "^11.1.1",
+    "minimist": "^1.2.8",
+    "puppeteer": "^21.0.0",
+    "puppeteer-extra": "^3.3.4",
+    "puppeteer-extra-plugin-stealth": "^2.11.1",
+    "turndown": "^7.1.1",
+    "user-agents": "^1.0.710"
+  }
+}

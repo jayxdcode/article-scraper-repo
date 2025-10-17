@@ -1,64 +1,197 @@
-<!DOCTYPE html>
-<html>
-
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>API</title>
-  
-  <style>
-    body {
-      font-family: 'Roboto Mono', monospace;
-    }
-    button {
-      font-size: 16px;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>News Catalog — Scrapers</title>
+
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <meta name="theme-color" content="#0b1220" />
 </head>
-
 <body>
-  <h1>Trigger GitHub Workflow</h1>
-  <button id="triggerButton">Run Workflow</button>
+  <div id="app" class="layout-sidebar theme-follow system-font">
 
-  <script>
-    document.getElementById('triggerButton').addEventListener('click', function() {
-      const token = 'YOUR_PERSONAL_ACCESS_TOKEN';  // Replace with your GitHub PAT
-      const owner = 'YOUR_GITHUB_USERNAME';       // Replace with your GitHub username
-      const repo = 'YOUR_REPO_NAME';              // Replace with your repository name
-      const workflowId = 'scrape-editorials.yml'; // Replace with your workflow filename
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">
+          <svg viewBox="0 0 32 32" width="36" height="36" aria-hidden="true">
+            <rect rx="6" width="100%" height="100%" fill="var(--accent)"></rect>
+            <text x="50%" y="60%" alignment-baseline="middle" text-anchor="middle" font-size="14" fill="#fff" font-family="system-ui,Segoe UI,Roboto">JX</text>
+          </svg>
+        </div>
+        <div class="title-block">
+          <div class="title">jayxdcode</div>
+          <div class="subtitle">News Catalog</div>
+        </div>
+      </div>
 
-      fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `token ${token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ref: 'main' // Replace with your branch name if different from 'main'
-        })
-      })
-      .then(response => {
-        if (response.ok) {
-          alert('Workflow triggered successfully!');
-        } else {
-          alert('Failed to trigger workflow.');
-        }
-      })
-      .catch(error => {
-        alert('Error triggering workflow: ' + error);
-      });
-    });
-  </script>
+      <nav class="nav" role="navigation" aria-label="Main">
+        <button class="nav-btn active" data-view="catalog"><i class='bx bx-grid-alt'></i><span>Catalog</span></button>
+        <button class="nav-btn" data-view="logs"><i class='bx bx-file'></i><span>Logs</span></button>
+        <button class="nav-btn" data-view="settings"><i class='bx bx-cog'></i><span>Settings</span></button>
+        <button class="nav-btn" data-view="about"><i class='bx bx-info-circle'></i><span>About</span></button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="small">Theme</div>
+        <div class="theme-preview" id="themePreview" aria-hidden="true"></div>
+        <div class="version">v1 • Scraper</div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main" role="main">
+      <header class="topbar" id="topbar">
+        <div class="left">
+          <button id="burger" class="icon-btn" aria-label="Toggle menu"><i class='bx bx-menu'></i></button>
+          <div class="page-title" id="pageTitle">Catalog</div>
+        </div>
+        <div class="right">
+          <button class="btn ghost" id="openSettings" aria-haspopup="true"><i class='bx bx-cog'></i> Settings</button>
+        </div>
+      </header>
+
+      <section class="content" id="content">
+
+        <!-- CATALOG VIEW -->
+        <div class="view view-catalog" data-view="catalog">
+          <div class="controls">
+            <div class="control-left">
+              <h2>Latest From Your Sources</h2>
+              <p class="muted">News and editorials discovered by your scrapers. Run a scraper to fetch newest items.</p>
+            </div>
+            <div class="control-right">
+              <select id="catalogFilter" class="select" aria-label="Filter source">
+                <option value="all">All sources</option>
+                <option value="inquirer">Inquirer</option>
+                <option value="philstar">Philstar</option>
+              </select>
+              <button id="runAll" class="btn primary">Run All</button>
+            </div>
+          </div>
+
+          <div class="grid-news" id="projectGrid" aria-live="polite">
+            <!-- JS populates news cards -->
+          </div>
+        </div>
+
+        <!-- LOGS VIEW -->
+        <div class="view view-logs hidden" data-view="logs">
+          <h2>Logs</h2>
+          <p class="muted">Latest run logs and reports (local). CI artifacts are uploaded by your workflows.</p>
+          <div id="localLogs" class="logs-box" role="log" aria-live="polite">No logs yet.</div>
+        </div>
+
+        <!-- SETTINGS VIEW -->
+        <div class="view view-settings hidden" data-view="settings">
+          <h2>Settings</h2>
+          <p class="muted">Customize layout, theme, accessibility, and fonts. Settings persist in localStorage.</p>
+
+          <div class="settings-grid">
+
+            <div class="card">
+              <h3>Layout Mode</h3>
+              <div class="option-group">
+                <label><input type="radio" name="layoutMode" value="sidebar"> Side bar</label>
+                <label><input type="radio" name="layoutMode" value="topbar"> Top bar</label>
+                <label><input type="radio" name="layoutMode" value="bottombar"> Bottom bar</label>
+              </div>
+              <div class="option-group stacked">
+                <label><input type="checkbox" id="compactToggle"> Compact mode</label>
+                <label><input type="checkbox" id="expandedToggle"> Expanded cards</label>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Theme</h3>
+              <div class="option-group">
+                <label>Mode:
+                  <select id="themeMode">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="system">Follow system</option>
+                  </select>
+                </label>
+              </div>
+              <div class="option-group">
+                <label>Preset:
+                  <select id="themePreset">
+                    <option value="discord-dark">Discord Dark</option>
+                    <option value="discord-light">Discord Light</option>
+                    <option value="midnight">Midnight</option>
+                    <option value="solarized">Solarized</option>
+                    <option value="aurora">Aurora</option>
+                    <option value="matrix">Matrix</option>
+                  </select>
+                </label>
+              </div>
+              <div class="option-group">
+                Accent: <input type="color" id="accentPicker" value="#44ccff" />
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Typography</h3>
+              <div class="option-group">
+                <label>Font:
+                  <select id="fontSelect">
+                    <option value="system">System UI</option>
+                    <option value="poppins">Poppins</option>
+                    <option value="inter">Inter</option>
+                    <option value="roboto">Roboto</option>
+                    <option value="mono">Monospace</option>
+                  </select>
+                </label>
+              </div>
+              <div class="option-group">
+                <label>Base Font Size: <input id="fontSize" type="range" min="12" max="20" value="14" /></label>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Accessibility</h3>
+              <div class="option-group">
+                <label><input type="checkbox" id="reduceMotion"> Reduce motion</label>
+                <label><input type="checkbox" id="highContrast"> High contrast</label>
+                <label><input type="checkbox" id="largeText"> Large text</label>
+              </div>
+              <div style="margin-top:.5rem">
+                <button id="exportSettings" class="btn">Export JSON</button>
+                <button id="importSettings" class="btn ghost">Import</button>
+                <input type="file" id="importFile" accept=".json" style="display:none" />
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ABOUT VIEW -->
+        <div class="view view-about hidden" data-view="about">
+          <h2>About</h2>
+          <p class="muted">News Catalog for your scrapers. Use Settings → Layout to change the look. The Run buttons are placeholders — wire them to CI or an endpoint.</p>
+          <div class="split-row">
+            <div class="split">
+              <h3>Designer</h3>
+              <p>Jay — UI inspired by the ZIP sidebar/dashboard with compact cards and accessible settings.</p>
+            </div>
+            <div class="split abt-block">
+              <h3>Quick links</h3>
+              <p><a href="#" id="openRepo">Open repo</a></p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <footer class="footer">
+        <div class="footer-left">© jayxdcode</div>
+        <div class="footer-right">Layout: <span id="footerLayout">side</span></div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="assets/js/app.js"></script>
 </body>
-
 </html>

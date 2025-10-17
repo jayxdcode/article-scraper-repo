@@ -1,27 +1,36 @@
 {
-  "sites": [
-    {
-      "name": "Inquirer",
-      "listing_url": "https://opinion.inquirer.net",
-      "listing_selector": "div#opinion-v2-mh",
-      "link_selector": "a[href]",
-      "article_selectors": {
-        "title": "title",
-        "article_section": "section#inq_section",
-        "paragraphs": "section#inq_section p",
-        "headings": "section#inq_section h2"
-      }
+  "puppeteer": {
+    "headless": true,
+    "defaultTimeout": 60000,
+    "userAgentRotation": true,
+    "blockResources": ["image","stylesheet","font"]
+  },
+  "sites": {
+    "inquirer": {
+      "index_url": "https://opinion.inquirer.net/",
+      "link_selector": "div#opinion-v2-mh a",
+      "link_attr": "href",
+      "link_limit": 1,
+      "article": "article",
+      "title": "article h1",
+      "author": "",
+      "date": "",
+      "content": "div#art_body_wrap div#article_content div#FOR_target_content",
+      "art_plat": "div#art_plat",
+      "test_urls": []
     },
-    {
-      "name": "Philstar",
-      "listing_url": "https://philstar.com/opinion",
-      "listing_selector": "div.carousel__item",
-      "link_selector": "a[href]",
-      "article_selectors": {
-        "title": "title",
-        "article_section": "div.article__content",
-        "paragraphs": "div.article__content p"
-      }
+    "philstar": {
+      "index_url": "https://www.philstar.com/opinion",
+      "link_selector": ".article__teaser a",
+      "link_attr": "href",
+      "link_limit": 5,
+      "article": "article",
+      "title": "h1.article__title",
+      "author": "div.article__credits-author-pub",
+      "date": "div.article__date-published",
+      "content": "div#sports_article_writeup.article__writeup",
+      "feature_image_selector": "div#sports_header_image img",
+      "test_urls": []
     }
-  ]
+  }
 }

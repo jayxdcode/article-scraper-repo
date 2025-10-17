@@ -1,0 +1,70 @@
+name: Auto Scraper (Inquirer + Philstar)
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # daily 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      site:
+        description: 'Site to run (inquirer or philstar). Leave empty to run both.'
+        required: false
+        default: ''
+      run_tests_first:
+        description: 'Run tests first (true/false)'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run tests (optional)
+        if: ${{ github.event.inputs.run_tests_first == 'true' }}
+        run: |
+          if [ "${{ github.event.inputs.site }}" = "" ]; then
+            npm test
+          else
+            npm test -- --site="${{ github.event.inputs.site }}"
+          fi
+
+      - name: Run scrapers
+        run: |
+          if [ "${{ github.event.inputs.site }}" = "inquirer" ]; then
+            npm run scrape:inquirer
+          elif [ "${{ github.event.inputs.site }}" = "philstar" ]; then
+            npm run scrape:philstar
+          else
+            npm run scrape:all
+          fi
+
+      - name: Upload scraped articles
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraped-articles
+          path: articles
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: logs
