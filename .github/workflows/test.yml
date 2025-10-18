@@ -125,8 +125,10 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y chromium-browser
           fi
-      env:
-        PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+      - name: Set Puppeteer Executable Path
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+        run: echo "PUPPETEER_EXECUTABLE_PATH set for following steps"
 
       - name: Run tests
         run: |
