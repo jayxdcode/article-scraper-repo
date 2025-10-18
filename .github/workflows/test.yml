@@ -118,18 +118,14 @@ jobs:
           PKG_VER=$(node -e "try{console.log(require('puppeteer/package.json').version)}catch(e){console.log('latest')}")
           echo "puppeteer version: $PKG_VER"
           # try npx installer first; if it fails, fall back to apt
-          if npx --yes puppeteer@$PKG_VER browsers install chrome; then
+          if npx --yes @puppeteer/browsers install chrome@121.0.6167.85; then
             echo "npx puppeteer browser install succeeded"
           else
             echo "npx install failed — falling back to apt"
             sudo apt-get update
             sudo apt-get install -y chromium-browser
           fi
-      - name: Set Puppeteer Executable Path
-        env:
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
-        run: echo "PUPPETEER_EXECUTABLE_PATH set for following steps"
-
+      
       - name: Run tests
         run: |
           if [ "${{ github.event.inputs.site }}" = "" ]; then
