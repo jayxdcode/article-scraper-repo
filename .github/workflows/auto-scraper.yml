@@ -130,8 +130,6 @@ jobs:
           fi
 
       - name: Ensure Chromium (try npx then apt fallback)
-        env:
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
         run: |
           set -e
           # try to read installed puppeteer version; fallback to 'latest'
@@ -139,7 +137,7 @@ jobs:
           echo "puppeteer version: $PKG_VER"
 
           # prefer npx installer that fetches the correct browser for the installed puppeteer
-          if npx --yes puppeteer@$PKG_VER browsers install chrome; then
+          if npx --yes @puppeteer/browsers install chrome@121.0.6167.85; then
             echo "npx puppeteer browser install succeeded"
           else
             echo "npx install failed — falling back to apt"
