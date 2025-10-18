@@ -128,6 +128,22 @@ jobs:
             echo "node_modules missing — running npm ci as fallback"
             npm ci
           fi
+          
+      - name: Ensure Chromium (try npx then apt fallback)
+        run: |
+          set -e
+          PKG_VER=$(node -e "try{console.log(require('puppeteer/package.json').version)}catch(e){console.log('latest')}")
+          echo "puppeteer version: $PKG_VER"
+          # try npx installer first; if it fails, fall back to apt
+          if npx --yes puppeteer@$PKG_VER browsers install chrome; then
+            echo "npx puppeteer browser install succeeded"
+          else
+            echo "npx install failed — falling back to apt"
+            sudo apt-get update
+            sudo apt-get install -y chromium-browser
+          fi
+      env:
+        PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
 
       - name: Run tests (optional)
         if: ${{ github.event.inputs.run_tests_first == 'true' }}
