@@ -43,26 +43,25 @@ jobs:
             echo "created=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Generate package-lock.json (install packages)
-        if: steps.check_lock.outputs.created == 'true'
-        run: |
-          # Install dependencies to generate a package-lock.json
-          npm install --no-audit --no-fund
-
-      - name: Commit package-lock.json
+      - name: Generate package-lock.json and commit node_modules (if missing)
         if: steps.check_lock.outputs.created == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Install dependencies to generate a package-lock.json and node_modules
+          npm install --no-audit --no-fund
+
+          # commit package-lock.json and node_modules so other jobs can reuse them
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          git commit -m "chore(ci): add package-lock.json" || echo "No changes to commit"
+          git add package-lock.json node_modules || true
+          git commit -m "chore(ci): add package-lock.json and node_modules [skip ci]" || echo "No changes to commit"
+
           BRANCH="${{ github.ref_name }}"
           if [ -z "$BRANCH" ]; then
             BRANCH=$(git rev-parse --abbrev-ref HEAD)
           fi
-          git push origin HEAD:"$BRANCH"
+          git push origin HEAD:"$BRANCH" || echo "Push failed (branch protection?)"
 
   install-deps:
     needs: ensure-lockfile
@@ -70,29 +69,39 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Restore node_modules cache
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json','package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install deps
+      - name: Use committed node_modules if present, otherwise install and commit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Only install on this job (cache miss or fresh runner)
-          if [ ! -d "node_modules" ] || [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
+          set -e
+          if [ -d "node_modules" ]; then
+            echo "node_modules already present from repo — skipping install"
+            ls -ld node_modules || true
+            exit 0
           fi
+
+          echo "node_modules not present; running npm ci to install deps"
+          npm ci
+
+          # commit node_modules so future runs can reuse
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add node_modules || true
+          git commit -m "chore(ci): add node_modules [skip ci]" || echo "No changes to commit"
+
+          BRANCH="${{ github.ref_name }}"
+          if [ -z "$BRANCH" ]; then
+            BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          fi
+          git push origin HEAD:"$BRANCH" || echo "Push failed (branch protection?)"
 
   scrape:
     needs: install-deps
@@ -111,14 +120,14 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Restore node_modules cache (for scraper runner)
-        id: cache-node-modules-restore
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json','package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      - name: Check node_modules presence
+        run: |
+          if [ -d "node_modules" ]; then
+            echo "node_modules present — ready to run scrapers"
+          else
+            echo "node_modules missing — running npm ci as fallback"
+            npm ci
+          fi
 
       - name: Run tests (optional)
         if: ${{ github.event.inputs.run_tests_first == 'true' }}
@@ -148,7 +157,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add articles || true
           git commit -m "chore(scraper): add scraped articles [skip ci]" || echo "No changes to commit"
-          # push to main
           git push origin HEAD:main || echo "Push failed (branch protection?)"
 
       - name: Upload logs
