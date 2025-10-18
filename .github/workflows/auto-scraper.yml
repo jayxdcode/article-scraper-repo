@@ -15,7 +15,7 @@ on:
         default: 'true'
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 jobs:
@@ -58,8 +58,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add package-lock.json
           git commit -m "chore(ci): add package-lock.json" || echo "No changes to commit"
-          BRANCH="${GITHUB_REF#refs/heads/}"
-          if [ -z "$BRANCH" ] || [ "$BRANCH" = "$GITHUB_REF" ]; then
+          BRANCH="${{ github.ref_name }}"
+          if [ -z "$BRANCH" ]; then
             BRANCH=$(git rev-parse --abbrev-ref HEAD)
           fi
           git push origin HEAD:"$BRANCH"
@@ -87,6 +87,7 @@ jobs:
 
       - name: Install deps
         run: |
+          # Only install on this job (cache miss or fresh runner)
           if [ ! -d "node_modules" ] || [ -f package-lock.json ]; then
             npm ci
           else
@@ -97,11 +98,13 @@ jobs:
     needs: install-deps
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -116,15 +119,6 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json','package.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-
-      - name: Install deps (no-op if cache restored)
-        run: |
-          # Ensure dependencies are present on this runner. If cache restored they exist already.
-          if [ ! -d "node_modules" ] || [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install --no-audit --no-fund
-          fi
 
       - name: Run tests (optional)
         if: ${{ github.event.inputs.run_tests_first == 'true' }}
@@ -145,12 +139,17 @@ jobs:
             npm run scrape:all
           fi
 
-      - name: Upload scraped articles
+      - name: Commit scraped articles to main
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: scraped-articles
-          path: articles
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add articles || true
+          git commit -m "chore(scraper): add scraped articles [skip ci]" || echo "No changes to commit"
+          # push to main
+          git push origin HEAD:main || echo "Push failed (branch protection?)"
 
       - name: Upload logs
         if: always()

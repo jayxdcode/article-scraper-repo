@@ -51,10 +51,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add package-lock.json
           git commit -m "chore(ci): add package-lock.json" || echo "No changes to commit"
-          # push back to the branch that triggered the workflow
-          BRANCH="${GITHUB_REF#refs/heads/}"
-          if [ -z "$BRANCH" ] || [ "$BRANCH" = "$GITHUB_REF" ]; then
-            # fallback to current branch name if GITHUB_REF is not a heads ref
+          BRANCH="${{ github.ref_name }}"
+          if [ -z "$BRANCH" ]; then
             BRANCH=$(git rev-parse --abbrev-ref HEAD)
           fi
           git push origin HEAD:"$BRANCH"
@@ -62,7 +60,6 @@ jobs:
   install-deps:
     needs: ensure-lockfile
     runs-on: ubuntu-latest
-    # This job restores the cache early so the cache action's post-run will execute and upload the cache
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -83,7 +80,7 @@ jobs:
 
       - name: Install deps
         run: |
-          # If cache miss (node_modules doesn't exist) or lockfile is present, run npm ci
+          # Only install on this job (cache miss or fresh runner)
           if [ ! -d "node_modules" ] || [ -f package-lock.json ]; then
             npm ci
           else

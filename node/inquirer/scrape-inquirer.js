@@ -1,4 +1,3 @@
-// node/inquirer/scrape-inquirer.js
 const fs = require('fs-extra');
 const path = require('path');
 const puppeteer = require('puppeteer-extra');
@@ -29,7 +28,11 @@ function appendLog(line) {
 }
 
 function sanitizeFileName(s) {
-  return (s || 'article').replace(/[<>:"/\\|?*\x00-\x1F]/g, '').slice(0, 200).trim();
+  return String(s || 'article')
+    .replace(/[\\/]/g, '_') // replace backslash and forward slash with underscore
+    .replace(/[<>:\"|?*\x00-\x1F]/g, '')
+    .slice(0, 200)
+    .trim();
 }
 
 // helper to try to extract featured image from HTML comments around article
@@ -87,8 +90,7 @@ async function run() {
   const fmtDate = `${year}-${month}-${day}`;
   const R = () => Math.random().toString(36).substring(2, 7);
   
-  console.log(`\nRun ID INQ_${fmtDate}#$*{R()}\n`);
-  
+  console.log(`\nRun ID INQ_${fmtDate}_${R()}\n`);
   
   const browser = await puppeteer.launch({
     headless: config.puppeteer?.headless !== false,
@@ -141,7 +143,7 @@ async function run() {
         if (tagName === 'p') return textContent;
         return textContent;
       });
-      const contentString = contentParts.join('\\n\\n');
+      const contentString = contentParts.join('\n\n');
       const h1 = articleWrapper.querySelector('h1');
       const title = h1 ? h1.textContent.trim() : (document.title || '').trim();
       return { ok: true, title, creationInfo, contentString };
@@ -160,13 +162,6 @@ async function run() {
     }
     
     // Build markdown per your format; include featured image if found
-    // Format:
-    // ### Editorial
-    // # Title
-    // #### creationInfo
-    // ---
-    // ![featured](url)  <-- if available
-    // content...
     const mdParts = [];
     mdParts.push('### Editorial');
     mdParts.push(`# ${articleData.title || targetUrl}`);
@@ -178,7 +173,7 @@ async function run() {
     
     const md = mdParts.filter(Boolean).join('\n\n');
     
-    const filename = fmtDate + sanitizeFileName(articleData.title || "### No Title") + '.md';
+    const filename = `${fmtDate} ${sanitizeFileName(articleData.title || "### No Title")}.md`;
     const outPath = path.join(OUT_DIR, filename);
     fs.writeFileSync(outPath, md, 'utf8');
     

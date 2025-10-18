@@ -1,4 +1,3 @@
-// node/philstar/scrape-philstar.js
 const fs = require('fs-extra');
 const path = require('path');
 const puppeteer = require('puppeteer-extra');
@@ -27,7 +26,11 @@ function appendLog(line) {
   fs.appendFileSync(path.join(LOG_DIR, 'scrape-log.txt'), entry, 'utf8');
 }
 function sanitizeFileName(s) {
-  return (s || 'article').replace(/[<>:"/\\|?*\x00-\x1F]/g, '').slice(0,200).trim();
+  return String(s || 'article')
+    .replace(/[\\/]/g, '_')
+    .replace(/[<>:\"|?*\x00-\x1F]/g, '')
+    .slice(0,200)
+    .trim();
 }
 
 async function discoverLinks(page) {
@@ -58,7 +61,7 @@ const today = new Date();
   const fmtDate = `${year}-${month}-${day}`;
   const R = () => Math.random().toString(36).substring(2, 7);
   
-  console.log(`\nRun ID PHS_${fmtDate}#$*{R()}\n`);
+  console.log(`\nRun ID PHS_${fmtDate}_${R()}\n`);
   
   const browser = await puppeteer.launch({
     headless: config.puppeteer?.headless !== false,
@@ -138,14 +141,6 @@ const today = new Date();
     }
 
     // build markdown
-    // Format:
-    // ### [maybe Section]
-    // # Title
-    // #### Author
-    // #### Date
-    // ![featured](url)
-    // ---
-    // paragraph blocks
     const md = [
       '### Opinion',
       `# ${data.title}`,
@@ -157,7 +152,7 @@ const today = new Date();
       data.paragraphs.join('\n\n')
     ].filter(Boolean).join('\n\n');
 
-    const filename = fmtDate + sanitizeFileName(data.title || "### No Title") + '.md';
+    const filename = `${fmtDate} ${sanitizeFileName(data.title || "### No Title")}.md`;
     const outPath = path.join(OUT_DIR, filename);
     fs.writeFileSync(outPath, md, 'utf8');
 
