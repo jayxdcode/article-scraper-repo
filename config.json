@@ -17,20 +17,20 @@
       "date": "",
       "content": "div#art_body_wrap div#article_content div#FOR_target_content",
       "art_plat": "div#art_plat",
-      "test_urls": []
+      "test_urls": ['https://opinion.inquirer.net/186794/skewed-sense-of-entitlement']
     },
     "philstar": {
       "index_url": "https://www.philstar.com/opinion",
-      "link_selector": ".article__teaser a",
+      "link_selector": ".carousel__item a",
       "link_attr": "href",
       "link_limit": 5,
-      "article": "article",
+      "article": ".article__content",
       "title": "h1.article__title",
       "author": "div.article__credits-author-pub",
       "date": "div.article__date-published",
       "content": "div#sports_article_writeup.article__writeup",
       "feature_image_selector": "div#sports_header_image img",
-      "test_urls": []
+      "test_urls": ['https://www.philstar.com/opinion/2025/10/17/2480446/editorial-decaying-health-centers']
     }
   }
 }
