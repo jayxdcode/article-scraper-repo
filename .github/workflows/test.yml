@@ -59,9 +59,10 @@ jobs:
           fi
           git push origin HEAD:"$BRANCH"
 
-  run-tests:
+  install-deps:
     needs: ensure-lockfile
     runs-on: ubuntu-latest
+    # This job restores the cache early so the cache action's post-run will execute and upload the cache
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -71,7 +72,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Cache Node Modules
+      - name: Restore node_modules cache
         id: cache-node-modules
         uses: actions/cache@v4
         with:
@@ -88,6 +89,27 @@ jobs:
           else
             npm install
           fi
+
+  run-tests:
+    needs: install-deps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Restore node_modules cache (for test runner)
+        id: cache-node-modules-restore
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json','package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Run tests
         run: |
