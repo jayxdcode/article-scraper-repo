@@ -156,11 +156,11 @@ def extract_inquirer_content(article_url: str) -> Tuple[str, str]:
 def save_article(article_url: str, title: str, has_date_tag: bool, site_name: str):
     try:
         _, article_content = extract_inquirer_content(article_url)
-        date_prefix = datetime.now().strftime("%Y%m%d")
+        date_prefix = datetime.now().strftime("%Y-%m-%d")
         safe_title = title.replace('/', '_').replace('\\', '_')
         markdown_content = f"# {title}\n\n{article_url}\n\n\n\n{article_content}"
 
-        markdown_filename = f"{ART_MD_DIR}/[{date_prefix}] {safe_title}.md"
+        markdown_filename = f"{ART_MD_DIR}/{date_prefix} {safe_title}.md"
         os.makedirs(os.path.dirname(markdown_filename), exist_ok=True)
         with open(markdown_filename, "w", encoding='utf-8') as f:
             f.write(markdown_content)
@@ -173,7 +173,7 @@ def save_article(article_url: str, title: str, has_date_tag: bool, site_name: st
 
     # Convert Markdown to DOCX
     try:
-        output_filename = f"{ART_DOCX_DIR}/[{date_prefix}] {safe_title}.docx"
+        output_filename = f"{ART_DOCX_DIR}/{date_prefix} {safe_title}.docx"
         os.makedirs(os.path.dirname(output_filename), exist_ok=True)
         pypandoc.convert_text(markdown_content, 'docx', format='md', outputfile=output_filename)
         logging.info("DOCX saved: %s", output_filename)

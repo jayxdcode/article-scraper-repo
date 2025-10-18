@@ -92,12 +92,12 @@ def extract_philstar_content(article_url: str) -> Tuple[str, str]:
 
 def save_article(url: str, title: str, content: str, md_save_path: str, docx_save_path: str):
     try:
-        date_prefix = datetime.now().strftime("%Y%m%d")
+        date_prefix = datetime.now().strftime("%Y-%m-%d")
         safe_title = title.replace('/', '_').replace('\\', '_')
         os.makedirs(md_save_path, exist_ok=True)
         os.makedirs(docx_save_path, exist_ok=True)
 
-        md_file_path = os.path.join(md_save_path, f"[{date_prefix}] {safe_title}.md")
+        md_file_path = os.path.join(md_save_path, f"{date_prefix} {safe_title}.md")
         with open(md_file_path, 'w', encoding='utf-8') as file:
             file.write(f"# {title}\n\n[Read more here]({url})\n\n{content}")
         logging.info("Saved md: %s", md_file_path)
@@ -109,7 +109,7 @@ def save_article(url: str, title: str, content: str, md_save_path: str, docx_sav
 
     # Convert Markdown to DOCX
     try:
-        docx_file_path = os.path.join(docx_save_path, f"[{date_prefix}] {safe_title}.docx")
+        docx_file_path = os.path.join(docx_save_path, f"{date_prefix} {safe_title}.docx")
         pypandoc.convert_file(md_file_path, 'docx', outputfile=docx_file_path)
         logging.info("Converted to docx: %s", docx_file_path)
         print(f"!!! Converted {md_file_path} to {docx_file_path}.")

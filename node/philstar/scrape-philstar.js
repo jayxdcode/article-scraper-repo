@@ -51,6 +51,15 @@ async function discoverLinks(page) {
 }
 
 async function run() {
+const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const fmtDate = `${year}-${month}-${day}`;
+  const R = () => Math.random().toString(36).substring(2, 7);
+  
+  console.log(`\nRun ID PHS_${fmtDate}#$*{R()}\n`);
+  
   const browser = await puppeteer.launch({
     headless: config.puppeteer?.headless !== false,
     args: ['--no-sandbox','--disable-setuid-sandbox'],
@@ -148,7 +157,7 @@ async function run() {
       data.paragraphs.join('\n\n')
     ].filter(Boolean).join('\n\n');
 
-    const filename = sanitizeFileName(data.title || targetUrl) + '.md';
+    const filename = fmtDate + sanitizeFileName(data.title || "### No Title") + '.md';
     const outPath = path.join(OUT_DIR, filename);
     fs.writeFileSync(outPath, md, 'utf8');
 

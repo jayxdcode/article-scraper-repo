@@ -22,12 +22,14 @@ fs.ensureDirSync(LOG_DIR);
 fs.ensureDirSync(OUT_DIR);
 
 function nowTs() { return new Date().toISOString(); }
+
 function appendLog(line) {
   const entry = `[${nowTs()}] ${line}\n`;
   fs.appendFileSync(path.join(LOG_DIR, 'scrape-log.txt'), entry, 'utf8');
 }
+
 function sanitizeFileName(s) {
-  return (s || 'article').replace(/[<>:"/\\|?*\x00-\x1F]/g, '').slice(0,200).trim();
+  return (s || 'article').replace(/[<>:"/\\|?*\x00-\x1F]/g, '').slice(0, 200).trim();
 }
 
 // helper to try to extract featured image from HTML comments around article
@@ -78,18 +80,28 @@ async function discoverLatestIndex(page) {
 }
 
 async function run() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const fmtDate = `${year}-${month}-${day}`;
+  const R = () => Math.random().toString(36).substring(2, 7);
+  
+  console.log(`\nRun ID INQ_${fmtDate}#$*{R()}\n`);
+  
+  
   const browser = await puppeteer.launch({
     headless: config.puppeteer?.headless !== false,
-    args: ['--no-sandbox','--disable-setuid-sandbox'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
     defaultViewport: { width: 1200, height: 900 }
   });
   const page = await browser.newPage();
   await page.setUserAgent(new UserAgent().toString());
   await page.setExtraHTTPHeaders({ 'accept-language': 'en-US,en;q=0.9' });
-
+  
   try {
     let targetUrl = urlArg;
-
+    
     if (discover) {
       appendLog('Inquirer: discovery mode');
       const found = await discoverLatestIndex(page);
@@ -106,21 +118,21 @@ async function run() {
         appendLog(`Inquirer discovered: ${targetUrl} (title: ${found.title || 'n/a'})`);
       }
     }
-
+    
     appendLog(`Inquirer loading article ${targetUrl}`);
     await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: config.puppeteer?.defaultTimeout || 60000 });
-
+    
     // article extraction logic (your JS adapted)
     const articleData = await page.evaluate(() => {
       const articleWrapper = document.querySelector('article');
       if (!articleWrapper) return { ok: false, reason: 'article wrapper not found' };
-
+      
       const creationNode = articleWrapper.querySelector("div#art_plat");
       const creationInfo = creationNode ? creationNode.textContent.trim() : '';
-
+      
       const bodyWrapper = articleWrapper.querySelector("div#art_body_wrap div#article_content div#FOR_target_content");
       if (!bodyWrapper) return { ok: false, reason: 'body wrapper not found' };
-
+      
       const contents = bodyWrapper.querySelectorAll(':scope > p, :scope > h2');
       const contentParts = Array.from(contents).map(element => {
         const tagName = element.tagName.toLowerCase();
@@ -134,11 +146,11 @@ async function run() {
       const title = h1 ? h1.textContent.trim() : (document.title || '').trim();
       return { ok: true, title, creationInfo, contentString };
     });
-
+    
     if (!articleData.ok) {
       throw new Error('Article extraction failed: ' + (articleData.reason || 'unknown'));
     }
-
+    
     // attempt to find featured image via comment snippet method
     let featuredImage = null;
     try {
@@ -146,7 +158,7 @@ async function run() {
     } catch (e) {
       // ignore
     }
-
+    
     // Build markdown per your format; include featured image if found
     // Format:
     // ### Editorial
@@ -163,13 +175,13 @@ async function run() {
     if (featuredImage) mdParts.push(`![featured](${featuredImage})`);
     mdParts.push('');
     mdParts.push(articleData.contentString || '');
-
+    
     const md = mdParts.filter(Boolean).join('\n\n');
-
-    const filename = sanitizeFileName(articleData.title || targetUrl) + '.md';
+    
+    const filename = fmtDate + sanitizeFileName(articleData.title || "### No Title") + '.md';
     const outPath = path.join(OUT_DIR, filename);
     fs.writeFileSync(outPath, md, 'utf8');
-
+    
     appendLog(`Inquirer saved: ${outPath}`);
     console.log('Saved:', outPath);
     await browser.close();
