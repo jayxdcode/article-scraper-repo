@@ -95,7 +95,8 @@ async function run() {
   const browser = await puppeteer.launch({
     headless: config.puppeteer?.headless !== false,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    defaultViewport: { width: 1200, height: 900 }
+    defaultViewport: { width: 1200, height: 900 },
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
   });
   const page = await browser.newPage();
   await page.setUserAgent(new UserAgent().toString());
