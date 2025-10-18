@@ -19,84 +19,7 @@ permissions:
   issues: write
 
 jobs:
-  ensure-lockfile:
-    runs-on: ubuntu-latest
-    outputs:
-      created: ${{ steps.check_lock.outputs.created }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Check for package-lock.json
-        id: check_lock
-        run: |
-          if [ -f package-lock.json ]; then
-            echo "created=false" >> $GITHUB_OUTPUT
-          else
-            echo "created=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Generate package-lock.json (if missing)
-        if: steps.check_lock.outputs.created == 'true'
-        run: |
-          # create a package-lock.json without installing full node_modules
-          npm install --package-lock-only
-
-          # commit package-lock.json so cache key is consistent for future runs
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json || true
-          git commit -m "chore(ci): add package-lock.json [skip ci]" || echo "No changes to commit"
-          BRANCH="${{ github.ref_name }}"
-          if [ -z "$BRANCH" ]; then
-            BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          fi
-          git push origin HEAD:"$BRANCH" || echo "Push failed (branch protection?)"
-
-  install-deps:
-    needs: ensure-lockfile
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Cache node_modules and npm
-        uses: actions/cache@v4
-        id: node-cache
-        with:
-          path: |
-            node_modules
-            ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install dependencies (if cache miss)
-        run: |
-          if [ -d "node_modules" ]; then
-            echo "node_modules found in repo/cache — skipping npm ci"
-            ls -ld node_modules || true
-          else
-            echo "Installing dependencies with npm ci"
-            npm ci
-          fi
-
   scrape:
-    needs: install-deps
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -107,44 +30,37 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fail if package-lock.json missing
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "package-lock.json not found; this workflow expects the lockfile to be committed. Exiting."
+            exit 1
+          fi
+
+      - name: Ensure node_modules present (exit on missing)
+        run: |
+          if [ -d "node_modules" ]; then
+            echo "node_modules present — ready to run scrapers"
+            ls -ld node_modules || true
+          else
+            echo "node_modules missing — please run deps-commit workflow to create and commit node_modules. Exiting."
+            exit 1
+          fi
+
+      - name: Ensure Chromium binary committed
+        run: |
+          EXPECTED_CHROME_PATH="chrome/linux-121.0.6167.85/chrome-linux64/chrome"
+          if [ ! -x "$EXPECTED_CHROME_PATH" ] && [ ! -f "$EXPECTED_CHROME_PATH" ]; then
+            echo "Expected chrome binary not found at $EXPECTED_CHROME_PATH"
+            echo "Please run deps-commit workflow to commit the chrome binary."
+            exit 1
+          fi
+          echo "Found chrome binary at $EXPECTED_CHROME_PATH"
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Restore cache (ensure available in this job too)
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Check node_modules presence
-        run: |
-          if [ -d "node_modules" ]; then
-            echo "node_modules present — ready to run scrapers"
-          else
-            echo "node_modules missing — running npm ci as fallback"
-            npm ci
-          fi
-
-      - name: Ensure Chromium (try npx then apt fallback)
-        run: |
-          set -e
-          # try to read installed puppeteer version; fallback to 'latest'
-          PKG_VER=$(node -e "try{console.log(require('puppeteer/package.json').version)}catch(e){console.log('latest')}")
-          echo "puppeteer version: $PKG_VER"
-
-          # prefer npx installer that fetches the correct browser for the installed puppeteer
-          if npx --yes @puppeteer/browsers install chrome@121.0.6167.85; then
-            echo "npx puppeteer browser install succeeded"
-          else
-            echo "npx install failed — falling back to apt"
-            sudo apt-get update
-            # ubuntu runner may use chromium or chromium-browser
-            sudo apt-get install -y chromium-browser chromium || true
-          fi
 
       - name: Run tests (optional)
         if: ${{ github.event.inputs.run_tests_first == 'true' }}
@@ -170,11 +86,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -e
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add articles || true
           git commit -m "chore(scraper): add scraped articles [skip ci]" || echo "No changes to commit"
-          # best-effort push; may fail due to branch protection
           git push origin HEAD:main || echo "Push failed (branch protection?)"
 
       - name: Upload logs
