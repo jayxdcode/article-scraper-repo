@@ -1,3 +1,4 @@
+// scrape-philstar.js (edited)
 const fs = require('fs-extra');
 const path = require('path');
 const puppeteer = require('puppeteer-extra');
@@ -12,18 +13,41 @@ const urlArg = argv.url || argv.u || '';
 const discover = argv.discover || (!urlArg);
 
 const repoRoot = path.resolve(__dirname, '..', '..');
-const config = fs.readJSONSync(path.join(repoRoot, 'config.json'));
+const configPath = path.join(repoRoot, 'config.json');
+
+let config = {};
+try {
+  if (!fs.existsSync(configPath)) {
+    console.error(`config.json not found at ${configPath}`);
+    process.exit(2);
+  }
+  config = fs.readJSONSync(configPath);
+} catch (err) {
+  console.error('Failed reading config.json:', err && err.message ? err.message : err);
+  process.exit(2);
+}
+
 const siteCfg = (config.sites && config.sites['philstar']) || {};
 
 const LOG_DIR = path.join(repoRoot, 'logs');
 const OUT_DIR = path.join(repoRoot, 'articles', 'philstar');
-fs.ensureDirSync(LOG_DIR);
-fs.ensureDirSync(OUT_DIR);
+
+try {
+  fs.ensureDirSync(LOG_DIR);
+  fs.ensureDirSync(OUT_DIR);
+} catch (err) {
+  console.error('Failed creating output directories:', err && err.message ? err.message : err);
+  process.exit(2);
+}
 
 function nowTs() { return new Date().toISOString(); }
 function appendLog(line) {
   const entry = `[${nowTs()}] ${line}\n`;
-  fs.appendFileSync(path.join(LOG_DIR, 'scrape-log.txt'), entry, 'utf8');
+  try {
+    fs.appendFileSync(path.join(LOG_DIR, 'scrape-log.txt'), entry, 'utf8');
+  } catch (e) {
+    console.error('Failed to append log:', e && e.message ? e.message : e);
+  }
 }
 function sanitizeFileName(s) {
   return String(s || 'article')
@@ -42,7 +66,6 @@ async function discoverLinks(page) {
       siteCfg.link_attr || 'href'
     );
     const unique = Array.from(new Set(hrefs)).slice(0, siteCfg.link_limit || 5);
-    // absolutify
     const abs = unique.map(h => {
       try { return new URL(h, indexUrl).toString(); } catch (e) { return h; }
     });
@@ -54,21 +77,37 @@ async function discoverLinks(page) {
 }
 
 async function run() {
-const today = new Date();
+  const today = new Date();
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
   const fmtDate = `${year}-${month}-${day}`;
   const R = () => Math.random().toString(36).substring(2, 7);
-  
+
   console.log(`\nRun ID PHS_${fmtDate}_${R()}\n`);
-  
-  const browser = await puppeteer.launch({
-    headless: config.puppeteer?.headless !== false,
-    args: ['--no-sandbox','--disable-setuid-sandbox'],
-    defaultViewport: { width: 1200, height: 900 },
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
-  });
+
+  const defaultChrome = path.join(repoRoot, 'chrome', 'linux-121.0.6167.85', 'chrome-linux64', 'chrome');
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || (fs.existsSync(defaultChrome) ? defaultChrome : undefined);
+
+  if (!executablePath) {
+    console.error('No puppeteer executablePath found. Set PUPPETEER_EXECUTABLE_PATH or commit the chrome binary to:');
+    console.error(defaultChrome);
+    process.exit(2);
+  }
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: config.puppeteer?.headless !== false,
+      args: ['--no-sandbox','--disable-setuid-sandbox'],
+      defaultViewport: { width: 1200, height: 900 },
+      executablePath
+    });
+  } catch (err) {
+    console.error('Failed to launch browser:', err && err.message ? err.message : err);
+    process.exit(2);
+  }
+
   const page = await browser.newPage();
   await page.setUserAgent(new UserAgent().toString());
   await page.setExtraHTTPHeaders({ 'accept-language': 'en-US,en;q=0.9' });
@@ -95,7 +134,6 @@ const today = new Date();
     appendLog('Philstar loading article: ' + targetUrl);
     await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: config.puppeteer?.defaultTimeout || 60000 });
 
-    // extract author, date, featured image, and only <p> in content container
     const data = await page.evaluate((contentSelector, featureSelector) => {
       const titleEl = document.querySelector('h1.article__title') || document.querySelector('h1');
       const title = titleEl ? titleEl.textContent.trim() : (document.title || '').trim();
@@ -106,7 +144,6 @@ const today = new Date();
       const dateNode = document.querySelector('div.article__date-published');
       const date = dateNode ? dateNode.textContent.trim() : '';
 
-      // featured image
       let feature = null;
       if (featureSelector) {
         const f = document.querySelector(featureSelector);
@@ -116,20 +153,16 @@ const today = new Date();
           if (img && img.src) feature = img.src;
         }
       } else {
-        // try common header image
         const img = document.querySelector('div#sports_header_image img, figure img');
         if (img && img.src) feature = img.src;
       }
 
-      // content paragraphs only
       const contentContainer = document.querySelector(contentSelector) || document.querySelector('div.article__writeup') || null;
       let paragraphs = [];
       if (contentContainer) {
-        // pick only direct <p> children (exclude inner ad divs)
         const ps = contentContainer.querySelectorAll(':scope > p');
         paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(Boolean);
       } else {
-        // fallback: pick all p in article
         const ps = document.querySelectorAll('article p');
         paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(Boolean);
       }
@@ -141,7 +174,6 @@ const today = new Date();
       throw new Error('Philstar: no paragraphs extracted');
     }
 
-    // build markdown
     const md = [
       '### Opinion',
       `# ${data.title}`,
@@ -155,16 +187,22 @@ const today = new Date();
 
     const filename = `${fmtDate} ${sanitizeFileName(data.title || "### No Title")}.md`;
     const outPath = path.join(OUT_DIR, filename);
-    fs.writeFileSync(outPath, md, 'utf8');
 
-    appendLog('Philstar saved: ' + outPath);
-    console.log('Saved:', outPath);
+    try {
+      fs.writeFileSync(outPath, md, 'utf8');
+      appendLog('Philstar saved: ' + outPath);
+      console.log('Saved:', outPath);
+    } catch (err) {
+      appendLog('Philstar failed to write file: ' + String(err));
+      throw err;
+    }
+
     await browser.close();
     process.exit(0);
   } catch (err) {
     appendLog('Philstar fatal: ' + String(err));
-    console.error(err);
-    await browser.close();
+    console.error(err && err.message ? err.message : err);
+    try { await browser.close(); } catch (e) {}
     process.exit(2);
   }
 }
