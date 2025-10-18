@@ -12,86 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  ensure-lockfile:
-    runs-on: ubuntu-latest
-    outputs:
-      created: ${{ steps.check_lock.outputs.created }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Check for package-lock.json
-        id: check_lock
-        run: |
-          if [ -f package-lock.json ]; then
-            echo "created=false" >> $GITHUB_OUTPUT
-          else
-            echo "created=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Generate package-lock.json and commit node_modules (if missing)
-        if: steps.check_lock.outputs.created == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm install --no-audit --no-fund
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json node_modules || true
-          git commit -m "chore(ci): add package-lock.json and node_modules [skip ci]" || echo "No changes to commit"
-          BRANCH="${{ github.ref_name }}"
-          if [ -z "$BRANCH" ]; then
-            BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          fi
-          git push origin HEAD:"$BRANCH" || echo "Push failed (branch protection?)"
-
-  install-deps:
-    needs: ensure-lockfile
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Use committed node_modules if present, otherwise install and commit
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          if [ -d "node_modules" ]; then
-            echo "node_modules already present from repo — skipping install"
-            ls -ld node_modules || true
-            exit 0
-          fi
-
-          echo "node_modules not present; running npm ci to install deps"
-          npm ci
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add node_modules || true
-          git commit -m "chore(ci): add node_modules [skip ci]" || echo "No changes to commit"
-          BRANCH="${{ github.ref_name }}"
-          if [ -z "$BRANCH" ]; then
-            BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          fi
-          git push origin HEAD:"$BRANCH" || echo "Push failed (branch protection?)"
-
   run-tests:
-    needs: install-deps
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -99,33 +20,39 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node
+      - name: Fail if package-lock.json missing
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "package-lock.json not found; this workflow expects the lockfile to be committed. Exiting."
+            exit 1
+          fi
+
+      - name: Ensure node_modules present (exit on missing)
+        run: |
+          if [ -d "node_modules" ]; then
+            echo "node_modules present — continuing"
+            ls -ld node_modules || true
+          else
+            echo "node_modules is not present. Please run the 'deps-commit' workflow to create and commit node_modules. Exiting."
+            exit 1
+          fi
+
+      - name: Setup Node (for running tests)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Ensure node_modules
+      - name: Ensure Chromium binary committed
         run: |
-          if [ -d "node_modules" ]; then
-            echo "node_modules present — ready to run tests"
-          else
-            echo "node_modules missing — running npm ci as fallback"
-            npm ci
+          # path relative to repo root where we expect chrome to be committed
+          EXPECTED_CHROME_PATH="chrome/linux-121.0.6167.85/chrome-linux64/chrome"
+          if [ ! -x "$EXPECTED_CHROME_PATH" ] && [ ! -f "$EXPECTED_CHROME_PATH" ]; then
+            echo "Expected chrome binary not found at $EXPECTED_CHROME_PATH"
+            echo "Please run deps-commit workflow to commit the chrome binary."
+            exit 1
           fi
-      - name: Ensure Chromium (try npx then apt fallback)
-        run: |
-          set -e
-          PKG_VER=$(node -e "try{console.log(require('puppeteer/package.json').version)}catch(e){console.log('latest')}")
-          echo "puppeteer version: $PKG_VER"
-          # try npx installer first; if it fails, fall back to apt
-          if npx --yes @puppeteer/browsers install chrome@121.0.6167.85; then
-            echo "npx puppeteer browser install succeeded"
-          else
-            echo "npx install failed — falling back to apt"
-            sudo apt-get update
-            sudo apt-get install -y chromium-browser
-          fi
-      
+          echo "Found chrome binary at $EXPECTED_CHROME_PATH"
+
       - name: Run tests
         run: |
           if [ "${{ github.event.inputs.site }}" = "" ]; then
