@@ -56,7 +56,7 @@ jobs:
       - name: Install chromium snap
         run: |
           echo "Attempting install..."
-          snap install chromium
+          sudo nap install chromium
 
       - name: Run tests
         run: |
