@@ -1,4 +1,4 @@
-// scrape-philstar.js (edited)
+// /node/philstar/scrape-philstar.js
 const fs = require('fs-extra');
 const path = require('path');
 const puppeteer = require('puppeteer-extra');
@@ -52,14 +52,17 @@ function appendLog(line) {
 function sanitizeFileName(s) {
   return String(s || 'article')
     .replace(/[\\/]/g, '_')
-    .replace(/[<>:\"|?*\x00-\x1F]/g, '')
+    .replace(/[<>:\\"|?*\x00-\x1F]/g, '')
     .slice(0,200)
     .trim();
 }
 
+// Default navigation timeout: 45 seconds unless overridden in config.puppeteer.defaultTimeout
+const NAV_TIMEOUT = config.puppeteer?.defaultTimeout ?? 45000;
+
 async function discoverLinks(page) {
   const indexUrl = siteCfg.index_url || 'https://www.philstar.com/opinion';
-  await page.goto(indexUrl, { waitUntil: 'domcontentloaded', timeout: config.puppeteer?.defaultTimeout || 60000 });
+  await page.goto(indexUrl, { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
   try {
     const hrefs = await page.$$eval(siteCfg.link_selector || '.article__teaser a', (els, attr) =>
       els.map(e => e.getAttribute(attr) || e.href || '').filter(Boolean),
@@ -73,6 +76,38 @@ async function discoverLinks(page) {
   } catch (e) {
     appendLog('Philstar discovery failed: ' + String(e));
     return [];
+  }
+}
+
+/**
+ * Try to fetch the raw HTML using the page context's fetch (works in most environments).
+ * If successful, set the page content so the rest of the extraction can run unchanged.
+ */
+async function tryRawFetchAndSet(page, url, uaString) {
+  try {
+    appendLog('Attempting raw fetch fallback for: ' + url);
+    const raw = await page.evaluate(async (url, ua) => {
+      try {
+        const resp = await fetch(url, { headers: { 'User-Agent': ua, 'Accept-Language': 'en-US,en;q=0.9' } });
+        const text = await resp.text();
+        return { ok: true, text };
+      } catch (err) {
+        return { ok: false, err: String(err) };
+      }
+    }, url, uaString);
+
+    if (!raw || !raw.ok) {
+      appendLog('Raw fetch returned error: ' + (raw && raw.err ? raw.err : 'unknown'));
+      return false;
+    }
+
+    // Use setContent so subsequent DOM queries work the same way as after page.goto
+    await page.setContent(raw.text, { waitUntil: 'domcontentloaded' });
+    appendLog('Raw fetch and setContent succeeded');
+    return true;
+  } catch (e) {
+    appendLog('Raw fetch failed: ' + String(e));
+    return false;
   }
 }
 
@@ -109,7 +144,8 @@ async function run() {
   }
 
   const page = await browser.newPage();
-  await page.setUserAgent(new UserAgent().toString());
+  const ua = new UserAgent().toString();
+  await page.setUserAgent(ua);
   await page.setExtraHTTPHeaders({ 'accept-language': 'en-US,en;q=0.9' });
 
   try {
@@ -132,8 +168,25 @@ async function run() {
     }
 
     appendLog('Philstar loading article: ' + targetUrl);
-    await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: config.puppeteer?.defaultTimeout || 60000 });
 
+    let navigated = false;
+    try {
+      await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: NAV_TIMEOUT });
+      navigated = true;
+    } catch (err) {
+      // If navigation timed out, try raw fetch fallback; otherwise rethrow
+      const msg = String(err && err.message ? err.message : err);
+      appendLog('Page.goto failed: ' + msg);
+      if (msg.includes('Timeout') || (err && err.name === 'TimeoutError')) {
+        appendLog('Navigation timed out after ' + NAV_TIMEOUT + 'ms; trying raw fetch fallback');
+        const ok = await tryRawFetchAndSet(page, targetUrl, ua);
+        if (!ok) throw new Error('Navigation timeout and raw fetch fallback failed');
+      } else {
+        throw err;
+      }
+    }
+
+    // Extraction runs the same whether we navigated or used setContent from fallback
     const data = await page.evaluate((contentSelector, featureSelector) => {
       const titleEl = document.querySelector('h1.article__title') || document.querySelector('h1');
       const title = titleEl ? titleEl.textContent.trim() : (document.title || '').trim();
