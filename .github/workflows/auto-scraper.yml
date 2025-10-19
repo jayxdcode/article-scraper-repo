@@ -5,6 +5,10 @@ on:
     - cron: '0 2 * * *' # daily 02:00 UTC
   workflow_dispatch:
     inputs:
+      generate_lock_forced:
+        description: 'If true, create a new package-lock.json, even if it already exists'
+        required: false
+        default: 'true'
       site:
         description: 'Site to run (inquirer or philstar). Leave empty to run both.'
         required: false
@@ -30,42 +34,106 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fail if package-lock.json missing
-        run: |
-          if [ ! -f package-lock.json ]; then
-            echo "package-lock.json not found; this workflow expects the lockfile to be committed. Exiting."
-            exit 1
-          fi
-
-      - name: Ensure node_modules present (exit on missing)
-        run: |
-          if [ -d "node_modules" ]; then
-            echo "node_modules present — ready to run scrapers"
-            ls -ld node_modules || true
-          else
-            echo "node_modules missing — please run deps-commit workflow to create and commit node_modules. Exiting."
-            exit 1
-          fi
-
-      - name: Ensure Chromium binary committed
-        run: |
-          EXPECTED_CHROME_PATH="chrome/linux-121.0.6167.85/chrome-linux64/chrome"
-          if [ ! -x "$EXPECTED_CHROME_PATH" ] && [ ! -f "$EXPECTED_CHROME_PATH" ]; then
-            echo "Expected chrome binary not found at $EXPECTED_CHROME_PATH"
-            echo "Please run deps-commit workflow to commit the chrome binary."
-            exit 1
-          fi
-          echo "Found chrome binary at $EXPECTED_CHROME_PATH"
-
-      - name: Install chromium snap
-        run: |
-          echo "Attempting install..."
-          sudo snap install chromium
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Cache dependencies
+        id: cache-deps # Assign an ID for later reference
+        uses: actions/cache@v4 # Use the latest version of the cache action
+        with:
+          path: |
+            ~/node_modules
+            ~/chrome
+            /snap
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Unique key based on OS and package-lock.json hash
+          restore-keys: |
+            ${{ runner.os }}-node-
+    
+      - name: Ensure package-lock.json (generate and commit if missing)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event.inputs.generate_lock_forced }}" = "true" ]; then
+            echo "Generating package-lock.json"
+            npm install --package-lock-only
+            echo "lock_exists=true" >> $GITHUB_OUTPUT
+          else
+            if [ -f package-lock.json ]; then
+              echo "lock_exists=true" >> $GITHUB_OUTPUT
+            else
+              echo "Generating package-lock.json (package-lock-only)"
+              npm install --package-lock-only
+              echo "lock_exists=true" >> $GITHUB_OUTPUT
+            fi
+          fi
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # add files
+          git add package-lock.json
+
+          git commit -m "ci(deps): added/updated package-lock.json" || echo "No changes to commit"
+
+          # push to main
+          git push origin HEAD:main || echo "Push failed (branch protection?)"
+
+      - name: Install dependecies (if cache miss)
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          echo
+          echo "Installing node dependencies..."
+          echo
+          npm ci
+          echo
+          echo
+          # try npx installer
+          echo "Installing puppeteer browsers (prefer npx)"
+          if npx --yes @puppeteer/browsers install chrome@121.0.6167.85; then
+            echo "npx browser installer succeeded"
+          else
+            echo "npx browser installer failed; attempting to install puppeteer and let it fetch the browser"
+            npm explore puppeteer -- npm run install || true
+          fi
+
+          # locate a likely chrome binary from installed puppeteer local-chromium
+          # typical path: node_modules/puppeteer/.local-chromium/linux-*/chrome-linux64/chrome
+          CHROME_SRC=$(find node_modules -type f -path "*/.local-chromium/*/chrome-linux64/chrome" -print -quit || true)
+          echo "Found chrome candidate at: $CHROME_SRC"
+
+          if [ -z "$CHROME_SRC" ]; then
+            echo "No chrome binary found under node_modules/.local-chromium. Attempting fallback: apt-get chromium-browser"
+            sudo apt-get update
+            sudo apt-get install -y chromium-browser || true
+            if command -v chromium-browser >/dev/null 2>&1; then
+              CHROME_SRC=$(command -v chromium-browser)
+              echo "Found system chromium at $CHROME_SRC"
+            fi
+          fi
+
+          if [ -z "$CHROME_SRC" ]; then
+            echo "Could not find a chrome binary to commit. Exiting with non-zero (you can still commit manually)."
+            exit 1
+          fi
+
+          DEST_DIR="chrome/linux-121.0.6167.85/chrome-linux64"
+          mkdir -p "$DEST_DIR"
+          cp -v "$CHROME_SRC" "$DEST_DIR/chrome"
+          chmod +x "$DEST_DIR/chrome"
+          echo "Copied chrome to $DEST_DIR/chr
+          ome"
+
+          echo
+          echo
+          echo "Installing chromium snap..."
+          echo
+          echo "Attempting install..."
+          sudo snap install chromium
 
       - name: Run tests (optional)
         if: ${{ github.event.inputs.run_tests_first == 'true' }}
