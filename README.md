@@ -159,7 +159,7 @@ We welcome contributions in both Node.js and Python tracks, including: ✅ Selec
 
 ## 📄 License
 
-Licensed under the MIT License.
+Licensed under the BSD 3-Clause License.
 See the full details in the LICENSE file.
 
 
