@@ -59,7 +59,7 @@ function sanitizeFileName(s) {
 
 async function discoverLinks(page) {
   const indexUrl = siteCfg.index_url || 'https://www.philstar.com/opinion';
-  await page.goto(indexUrl, { waitUntil: 'networkidle2', timeout: config.puppeteer?.defaultTimeout || 60000 });
+  await page.goto(indexUrl, { waitUntil: 'domcontentloaded', timeout: config.puppeteer?.defaultTimeout || 60000 });
   try {
     const hrefs = await page.$$eval(siteCfg.link_selector || '.article__teaser a', (els, attr) =>
       els.map(e => e.getAttribute(attr) || e.href || '').filter(Boolean),
