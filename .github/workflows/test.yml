@@ -6,6 +6,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'config.json'
 
 permissions:
   contents: write   # allow committing log files
