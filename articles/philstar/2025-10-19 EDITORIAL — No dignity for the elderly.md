@@ -2,7 +2,7 @@
 
 # EDITORIAL — No dignity for the elderly
 
-#### The Philippine Star
+#### The Philippine Star This content was originally published by The Philippine Star following its editorial guidelines. Philstar.com hosts its content but has no editorial control over it.
 
 #### October 19, 2025 | 12:00am
 
