@@ -1,6 +1,6 @@
 name: Run Selectors Tests & Report
 
-# trigger manually or on push to main (adjust as needed)
+# trigger manually, or on push to main, or on schedule (everyday at 10:00 PHT / 02:00 UTC)
 on:
   workflow_dispatch:
     inputs:
@@ -8,7 +8,9 @@ on:
         description: 'If true, create a new package-lock.json, even if it already exists'
         required: false
         default: 'true'
-  
+  schedule:
+    - cron: '0 2 * * *' # 10:00 Asia/Manila (PHT) -> 02:00 UTC
+
 permissions:
   contents: write   # allow committing log files
   issues: write     # allow creating/updating issues
@@ -18,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_OPTIONS: "--max-old-space-size=4096"
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -30,17 +33,17 @@ jobs:
           node-version: '20'
 
       - name: Cache dependencies
-        id: cache-deps # Assign an ID for later reference
-        uses: actions/cache@v4 # Use the latest version of the cache action
+        id: cache-deps
+        uses: actions/cache@v4
         with:
           path: |
             ~/node_modules
             ~/chrome
             /snap
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Unique key based on OS and package-lock.json hash
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-    
+
       - name: Ensure package-lock.json (generate and commit if missing)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,7 +63,7 @@ jobs:
               echo "lock_exists=true" >> $GITHUB_OUTPUT
             fi
           fi
-          
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -92,7 +95,6 @@ jobs:
           fi
 
           # locate a likely chrome binary from installed puppeteer local-chromium
-          # typical path: node_modules/puppeteer/.local-chromium/linux-*/chrome-linux64/chrome
           CHROME_SRC=$(find node_modules -type f -path "*/.local-chromium/*/chrome-linux64/chrome" -print -quit || true)
           echo "Found chrome candidate at: $CHROME_SRC"
 
@@ -115,15 +117,13 @@ jobs:
           mkdir -p "$DEST_DIR"
           cp -v "$CHROME_SRC" "$DEST_DIR/chrome"
           chmod +x "$DEST_DIR/chrome"
-          echo "Copied chrome to $DEST_DIR/chr
-          ome"
+          echo "Copied chrome to $DEST_DIR/chrome"
 
-          echo
-          echo
+      - name: Install chromium snap
+        run: |
           echo "Installing chromium snap..."
-          echo
           echo "Attempting install..."
-          sudo snap install chromium
+          sudo snap install chromium || true
 
       - name: Prepare logs dir
         run: |
@@ -133,6 +133,7 @@ jobs:
         id: run_tests
         # capture both stdout and stderr to file
         run: |
+          set -euo pipefail
           TIMESTAMP=$(date --utc +"%Y-%m-%dT%H%M%SZ")
           # run test runner; save combined stdout+stderr
           node ./node/test/test-runner.js 2>&1 | tee logs/test-run-${TIMESTAMP}.log
@@ -142,12 +143,10 @@ jobs:
         if: always()
         run: |
           logpath=$(jq -r '.logfile' <<< "${{ steps.run_tests.outputs }}" 2>/dev/null || echo "${{ steps.run_tests.outputs.logfile }}")
-          # fallback if above doesn't work:
           logpath=${logpath:-logs/test-run-$(date --utc +"%Y-%m-%dT%H%M%SZ").log}
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$logpath" || true
-          # only commit if staged changes
           if ! git diff --cached --quiet; then
             git commit -m "chore(tests): add test log $logpath" || true
             git push origin HEAD:main || true
@@ -156,3 +155,69 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload logs artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-log
+          path: logs
+
+  report-failure:
+    name: Create issue on failure (include traceback)
+    runs-on: ubuntu-latest
+    needs: run-tests
+    if: needs.run-tests.result == 'failure'
+
+    steps:
+      - name: Download logs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-log
+          path: ./logs
+
+      - name: Create GitHub issue with traceback
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // find a sensible log file in ./logs
+            let logfile = null;
+            try {
+              const files = fs.readdirSync('logs').filter(f => f.endsWith('.log') || f.includes('test-run'));
+              if (files && files.length) {
+                // choose the newest-looking file
+                files.sort();
+                logfile = path.join('logs', files[files.length-1]);
+              }
+            } catch(e) {
+              // ignore
+            }
+
+            const tag = 'test-run-fail';
+            const id = new Date().toISOString().replace(/[:.]/g, '-');
+            const title = `[${tag}] ${id}`;
+
+            let body = `Automated test run failed for **${context.repo.owner}/${context.repo.repo}**\n\n`;
+            body += `Workflow: ${process.env.GITHUB_WORKFLOW} (run ${process.env.GITHUB_RUN_ID})\n\n`;
+
+            if (logfile && fs.existsSync(logfile)) {
+              let content = fs.readFileSync(logfile, 'utf8');
+              // truncate to avoid huge issues
+              if (content.length > 64000) content = content.slice(0, 64000) + '\n\n[truncated]';
+              body += 'Traceback / log (truncated):\n\n```\n' + content + '\n```\n';
+            } else {
+              body += 'No log file found to include in this issue (artifact may be missing).\n\n';
+            }
+
+            body += '\n\nPlease attach additional context or assign for triage.';
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['ci', 'test-failure']
+            });
