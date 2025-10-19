@@ -53,6 +53,11 @@ jobs:
           fi
           echo "Found chrome binary at $EXPECTED_CHROME_PATH"
 
+      - name: Install chromium snap
+        run: |
+          echo "Attempting install..."
+          snap install chromium
+
       - name: Run tests
         run: |
           if [ "${{ github.event.inputs.site }}" = "" ]; then
