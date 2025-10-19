@@ -267,8 +267,8 @@ async function run() {
     ].filter(Boolean).join('\n\n');
 
     const filename = `${fmtDate} ${sanitizeFileName(data.title || "### No Title")}`;
-    const outPath = path.join(OUT_DIR, filename, '.md');
-    const docxOut = path.join(D_OUT_DIR, filename, '.docx');
+    const outPath = path.join(OUT_DIR, `${filename}.md`);
+    const docxOut = path.join(D_OUT_DIR, `${filename}.docx`);
 
     try {
       fs.writeFileSync(outPath, md, 'utf8');
