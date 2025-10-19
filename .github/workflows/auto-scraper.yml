@@ -46,7 +46,6 @@ jobs:
           path: |
             ~/node_modules
             ~/chrome
-            /snap
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Unique key based on OS and package-lock.json hash
           restore-keys: |
             ${{ runner.os }}-node-
@@ -125,13 +124,11 @@ jobs:
           mkdir -p "$DEST_DIR"
           cp -v "$CHROME_SRC" "$DEST_DIR/chrome"
           chmod +x "$DEST_DIR/chrome"
-          echo "Copied chrome to $DEST_DIR/chr
-          ome"
+          echo "Copied chrome to $DEST_DIR/chrome"
 
-          echo
-          echo
+      - name: Install chromium snap
+        run: |
           echo "Installing chromium snap..."
-          echo
           echo "Attempting install..."
           sudo snap install chromium
 
