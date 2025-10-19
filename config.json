@@ -25,7 +25,7 @@
       "link_attr": "href",
       "link_limit": 5,
       "article": ".article__content",
-      "title": "h1.article__title",
+      "title": "div.article__title h1",
       "author": "div.article__credits-author-pub",
       "date": "div.article__date-published",
       "content": "div#sports_article_writeup.article__writeup",
