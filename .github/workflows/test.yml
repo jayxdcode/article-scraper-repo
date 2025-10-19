@@ -105,7 +105,7 @@ jobs:
         run: |
           TIMESTAMP=$(date --utc +"%Y-%m-%dT%H%M%SZ")
           # run test runner; save combined stdout+stderr
-          node ./node/test/test.js 2>&1 | tee logs/test-run-${TIMESTAMP}.log
+          node ./node/test/test-runner.js 2>&1 | tee logs/test-run-${TIMESTAMP}.log
           echo "logfile=logs/test-run-${TIMESTAMP}.log" >> $GITHUB_OUTPUT
 
       - name: Commit log file (if changed)
