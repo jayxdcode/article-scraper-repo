@@ -3,6 +3,11 @@ name: Run Selectors Tests & Report
 # trigger manually or on push to main (adjust as needed)
 on:
   workflow_dispatch:
+    inputs:
+      generate_lock_forced:
+        description: 'If true, create a new package-lock.json, even if it already exists'
+        required: false
+        default: 'true'
   
 permissions:
   contents: write   # allow committing log files
@@ -19,74 +24,104 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fail if package-lock.json missing
-        run: |
-          if [ ! -f package-lock.json ]; then
-            echo "package-lock.json not found; this workflow expects the lockfile to be committed. Exiting."
-            exit 1
-          fi
-          
-      - name: Ensure node_modules present (exit on missing)
-        run: |
-          if [ -d "node_modules" ]; then
-            echo "node_modules present — continuing"
-            ls -ld node_modules || true
-          else
-            echo "node_modules is not present. Please run the 'deps-commit' workflow to create and commit node_modules. Exiting."
-            exit 1
-          fi
-
       - name: Setup Node (for running tests)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install @actions/core if missing and commit
-        if: always()
+      - name: Cache dependencies
+        id: cache-deps # Assign an ID for later reference
+        uses: actions/cache@v4 # Use the latest version of the cache action
+        with:
+          path: |
+            ~/node_modules
+            ~/chrome
+            /snap
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Unique key based on OS and package-lock.json hash
+          restore-keys: |
+            ${{ runner.os }}-node-
+    
+      - name: Ensure package-lock.json (generate and commit if missing)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
-          if [ -d "node_modules/@actions/core" ]; then
-            echo "@actions/core already present. Skipping installation."
-            exit 0
+          if [ "${{ github.event.inputs.generate_lock_forced }}" = "true" ]; then
+            echo "Generating package-lock.json"
+            npm install --package-lock-only
+            echo "lock_exists=true" >> $GITHUB_OUTPUT
+          else
+            if [ -f package-lock.json ]; then
+              echo "lock_exists=true" >> $GITHUB_OUTPUT
+            else
+              echo "Generating package-lock.json (package-lock-only)"
+              npm install --package-lock-only
+              echo "lock_exists=true" >> $GITHUB_OUTPUT
+            fi
           fi
-
-          echo "@actions/core not found. Installing..."
-          npm install @actions/core@latest --no-audit --no-fund
-
+          
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Stage relevant files (node_modules, lockfile, and possibly package.json)
-          git add -A node_modules package-lock.json package.json || true
+          # add files
+          git add package-lock.json
 
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            COMMIT_MSG="chore(deps): add @actions/core to node_modules (auto-added by workflow)"
-            git commit -m "$COMMIT_MSG"
+          git commit -m "ci(deps): added/updated package-lock.json" || echo "No changes to commit"
 
-            REPO="${GITHUB_REPOSITORY}"
-            BRANCH="${GITHUB_REF##*/}"
-            echo "Pushing changes to $REPO on branch $BRANCH..."
-            git push "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH}"
-          fi
-          
-      - name: Ensure Chromium binary committed
+          # push to main
+          git push origin HEAD:main || echo "Push failed (branch protection?)"
+
+      - name: Install dependecies (if cache miss)
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
-          # path relative to repo root where we expect chrome to be committed
-          EXPECTED_CHROME_PATH="chrome/linux-121.0.6167.85/chrome-linux64/chrome"
-          if [ ! -x "$EXPECTED_CHROME_PATH" ] && [ ! -f "$EXPECTED_CHROME_PATH" ]; then
-            echo "Expected chrome binary not found at $EXPECTED_CHROME_PATH"
-            echo "Please run deps-commit workflow to commit the chrome binary."
+          set -euo pipefail
+          echo
+          echo "Installing node dependencies..."
+          echo
+          npm ci
+          echo
+          echo
+          # try npx installer
+          echo "Installing puppeteer browsers (prefer npx)"
+          if npx --yes @puppeteer/browsers install chrome@121.0.6167.85; then
+            echo "npx browser installer succeeded"
+          else
+            echo "npx browser installer failed; attempting to install puppeteer and let it fetch the browser"
+            npm explore puppeteer -- npm run install || true
+          fi
+
+          # locate a likely chrome binary from installed puppeteer local-chromium
+          # typical path: node_modules/puppeteer/.local-chromium/linux-*/chrome-linux64/chrome
+          CHROME_SRC=$(find node_modules -type f -path "*/.local-chromium/*/chrome-linux64/chrome" -print -quit || true)
+          echo "Found chrome candidate at: $CHROME_SRC"
+
+          if [ -z "$CHROME_SRC" ]; then
+            echo "No chrome binary found under node_modules/.local-chromium. Attempting fallback: apt-get chromium-browser"
+            sudo apt-get update
+            sudo apt-get install -y chromium-browser || true
+            if command -v chromium-browser >/dev/null 2>&1; then
+              CHROME_SRC=$(command -v chromium-browser)
+              echo "Found system chromium at $CHROME_SRC"
+            fi
+          fi
+
+          if [ -z "$CHROME_SRC" ]; then
+            echo "Could not find a chrome binary to commit. Exiting with non-zero (you can still commit manually)."
             exit 1
           fi
-          echo "Found chrome binary at $EXPECTED_CHROME_PATH"
 
-      - name: Install chromium snap
-        run: |
+          DEST_DIR="chrome/linux-121.0.6167.85/chrome-linux64"
+          mkdir -p "$DEST_DIR"
+          cp -v "$CHROME_SRC" "$DEST_DIR/chrome"
+          chmod +x "$DEST_DIR/chrome"
+          echo "Copied chrome to $DEST_DIR/chr
+          ome"
+
+          echo
+          echo
+          echo "Installing chromium snap..."
+          echo
           echo "Attempting install..."
           sudo snap install chromium
 
@@ -121,103 +156,3 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create or update GitHub Issue with log and summary
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-
-            // read the log file path from previous step output (available in env or outputs)
-            // try to find the newest logs/test-run-*.log as fallback
-            const logsDir = 'logs';
-            let logFile = null;
-            const files = fs.readdirSync(logsDir).filter(f => f.startsWith('test-run-')).sort();
-            if (files.length === 0) {
-              core = require('@actions/core');
-              core.setFailed('No log files found in logs/ directory.');
-              return;
-            } else {
-              logFile = path.join(logsDir, files[files.length - 1]);
-            }
-
-            const rawLog = fs.readFileSync(logFile, 'utf8');
-
-            // Attempt to parse a title from log: first line like "Test Run: INQ 2025-10-19_xdf3"
-            const firstLine = rawLog.split('\n').find(Boolean) || '';
-            // Use firstLine if it matches "Test Run:"
-            let issueTitle;
-            if (firstLine.startsWith('Test Run:')) {
-              issueTitle = firstLine.trim();
-            } else {
-              // fallback title
-              const now = new Date().toISOString().replace(/T.*/,'');
-              issueTitle = `Test Run: ${now}`;
-            }
-
-            // Find existing issue with exact title
-            const { data: issues } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open'
-            });
-
-            const existing = issues.find(i => i.title === issueTitle);
-
-            // Build compact summary from log: look for "TEST RESULTS" block or construct simple counts
-            let summary = '';
-            const summaryMatch = rawLog.match(/={5,}\nTEST RESULTS\n={5,}\n([\s\S]*?)\n---/m);
-            if (summaryMatch) {
-              summary = '```\n' + summaryMatch[1].trim() + '\n```';
-            } else {
-              // try to extract PASS/FAIL counts lines
-              const lines = rawLog.split('\n');
-              const counts = lines.filter(l => /\bPASS\b|\bFAIL\b/.test(l) && /:\s*\d+/.test(l));
-              summary = counts.length ? '```\n' + counts.join('\n') + '\n```' : '_No compact summary found in log._';
-            }
-
-            const body = [
-              `### Log file: \`${path.basename(logFile)}\``,
-              '',
-              '---',
-              '',
-              '#### Compact Summary',
-              summary,
-              '',
-              '---',
-              '',
-              '#### Full Log',
-              '```',
-              rawLog.slice(0, 32000), // limit issue body if very large (GitHub supports big bodies, but be safe)
-              '```'
-            ].join('\n');
-
-            if (existing) {
-              // update the issue (append a comment with full log and update the body)
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: existing.number,
-                body: `New test run appended. See compact summary below.\n\n${summary}\n\nFull log attached as a comment.`
-              });
-              await github.rest.issues.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: existing.number,
-                body: `${existing.body || ''}\n\n\n---\n\nAppended log from ${new Date().toISOString()}:\n\n${rawLog.slice(0, 32000)}`
-              });
-              core = require('@actions/core');
-              core.info(`Updated existing issue #${existing.number} (${issueTitle})`);
-            } else {
-              // create a fresh issue
-              const newIssue = await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: issueTitle,
-                body
-              });
-              core = require('@actions/core');
-              core.info(`Created issue #${newIssue.data.number} (${issueTitle})`);
-            }
