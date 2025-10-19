@@ -1,0 +1,54 @@
+Test Run: 2025-10-19_pu5e
+
+---
+Testing site: inquirer
+[inquirer] INFO: Running embedded Inquirer scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+[inquirer] INFO: Inquirer discovered: https://opinion.inquirer.net/186832/manananggal-ghosts-haunt-doh
+querySelector `article h1 (title)`: PASS
+found count: 1
+idx0 content: ‘Manananggal’, ghosts haunt DOH
+
+querySelector `article body paragraphs (inferred content)`: PASS
+found count: 16
+idx0 content: Health Secretary Teodoro Herbosa couldn’t have picked a more fitting symbol
+
+querySelector `featured image (comment snippet)`: PASS
+found count: 1
+idx0 content: https://www.inquirer.net/wp-content/uploads/2022/07/PDI-P20-300x105-1.jpg
+
+---
+Testing site: philstar
+[philstar] INFO: Running embedded Philstar scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+---
+
+=========================================
+TEST RESULTS
+=========================================
+inquirer:
+  3 PASS, 0 FAIL
+philstar:
+  0 PASS, 0 FAIL
+
+---
+
+Totals: 3 PASS, 0 FAIL
+
+
+Wrote full log to /home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2025-10-19T02-48-21-772Z.log
+LOGFILE:/home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2025-10-19T02-48-21-772Z.log
