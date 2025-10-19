@@ -2,7 +2,7 @@
 /**
  * Test runner for article-scraper-repo selectors.
  *
- * Usage: node node/test/test.js
+ * Usage: node node/test/test-runner.js
  *
  * This script will:
  * - run per-site tests
@@ -19,7 +19,30 @@
  */
 
 const fs = require('fs');
+const fse = require('fs-extra');
 const path = require('path');
+
+// puppeteer imports (used only by embedded scrapers)
+let puppeteerExtra;
+try {
+  puppeteerExtra = require('puppeteer-extra');
+} catch (e) {
+  // not fatal here — the embedded scrapers will report an error if puppeteer isn't available
+  puppeteerExtra = null;
+}
+let StealthPlugin, UserAgent;
+try {
+  StealthPlugin = require('puppeteer-extra-plugin-stealth');
+  UserAgent = require('user-agents');
+} catch (e) {
+  StealthPlugin = null;
+  UserAgent = null;
+}
+
+if (puppeteerExtra && StealthPlugin) puppeteerExtra.use(StealthPlugin());
+
+const minimist = require('minimist');
+const argv = minimist(process.argv.slice(2));
 
 // Simple logger util
 function makeLogger(site) {
@@ -42,6 +65,311 @@ function randBase36(len = 4) {
   }
   return s;
 }
+
+// ---------- Embedded scraper-test helpers for known sites ----------
+const repoRoot = path.resolve(__dirname, '..'); // node/
+
+function loadConfig() {
+  const configPath = path.join(repoRoot, '..', 'config.json');
+  try {
+    if (!fs.existsSync(configPath)) return {};
+    return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  } catch (e) {
+    return {};
+  }
+}
+
+async function runInquirerTest(siteFolder, logger) {
+  const config = loadConfig();
+  const siteCfg = (config.sites && config.sites['inquirer']) || {};
+  const urlArg = argv.url || argv.u || '';
+  const discover = argv.discover || (!urlArg);
+
+  if (!puppeteerExtra || !StealthPlugin) {
+    return { site: siteFolder, results: [], error: 'puppeteer-extra and stealth plugin required' };
+  }
+
+  const puppeteer = puppeteerExtra;
+  const UserAgentCtor = UserAgent;
+
+  const FIND_FEATURED_IMAGE_SNIPPET = `(function(){
+    const walker = document.createTreeWalker(document, NodeFilter.SHOW_COMMENT, null, false);
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.nodeValue && node.nodeValue.toUpperCase().includes('FEATURED IMAGE')) {
+        let cur = node.nextSibling;
+        for (let i=0;i<10 && cur;i++) {
+          if (cur.nodeType === Node.ELEMENT_NODE) {
+            const img = cur.querySelector ? cur.querySelector('img') : null;
+            if (img && img.src) return img.src;
+            if (cur.tagName && cur.tagName.toLowerCase() === 'img' && cur.src) return cur.src;
+          }
+          cur = cur.nextSibling;
+        }
+      }
+    }
+    return null;
+  })();`;
+
+  // find puppeteer executable path (same heuristic as your inquirer ref)
+  const defaultChrome = path.join(repoRoot, '..', 'chrome', 'linux-121.0.6167.85', 'chrome-linux64', 'chrome');
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || (fs.existsSync(defaultChrome) ? defaultChrome : undefined);
+  if (!executablePath) {
+    return { site: siteFolder, results: [], error: `No puppeteer executablePath found. Set PUPPETEER_EXECUTABLE_PATH or commit chrome binary to ${defaultChrome}` };
+  }
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: config.puppeteer?.headless !== false,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      defaultViewport: { width: 1200, height: 900 },
+      executablePath
+    });
+  } catch (err) {
+    return { site: siteFolder, results: [], error: `Failed to launch browser: ${String(err)}` };
+  }
+
+  const page = await browser.newPage();
+  await page.setUserAgent(new UserAgentCtor().toString());
+  await page.setExtraHTTPHeaders({ 'accept-language': 'en-US,en;q=0.9' });
+
+  try {
+    let targetUrl = urlArg;
+    if (discover) {
+      const indexUrl = siteCfg.index_url || 'https://opinion.inquirer.net/';
+      await page.goto(indexUrl, { waitUntil: 'networkidle2', timeout: config.puppeteer?.defaultTimeout || 60000 });
+      const found = await page.evaluate(() => {
+        if (window.location.hostname === 'opinion.inquirer.net' && window.location.pathname === '/') {
+          const listing = document.querySelectorAll("div#opinion-v2-mh");
+          const latest = listing && listing[0];
+          if (!latest) return { ok: false, reason: 'listing not found' };
+          const articleDateEl = latest.querySelector("div.oped-date");
+          const articleDate = articleDateEl ? articleDateEl.textContent.trim() : '';
+          const articleAnchor = latest.querySelector("a");
+          if (!articleAnchor) return { ok: false, reason: 'anchor not found in latest' };
+          const articleUrl = articleAnchor.href;
+          const title = articleAnchor.textContent ? articleAnchor.textContent.trim() : '';
+          return { ok: true, articleUrl, title, articleDate };
+        }
+        return { ok: false, reason: 'not listing root' };
+      });
+      if (found && found.ok) {
+        targetUrl = found.articleUrl;
+        logger.info(`Inquirer discovered: ${targetUrl}`);
+      } else if (siteCfg.test_urls && siteCfg.test_urls.length) {
+        targetUrl = siteCfg.test_urls[0];
+        logger.info(`Inquirer discovery fallback to test_url: ${targetUrl}`);
+      } else {
+        await browser.close();
+        return { site: siteFolder, results: [], error: `Inquirer discovery failed: ${found.reason || 'unknown'}` };
+      }
+    }
+
+    await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: config.puppeteer?.defaultTimeout || 60000 });
+
+    const articleData = await page.evaluate(() => {
+      const articleWrapper = document.querySelector('article');
+      if (!articleWrapper) return { ok: false, reason: 'article wrapper not found' };
+
+      const creationNode = articleWrapper.querySelector("div#art_plat");
+      const creationInfo = creationNode ? creationNode.textContent.trim() : '';
+
+      const bodyWrapper = articleWrapper.querySelector("div#art_body_wrap div#article_content div#FOR_target_content");
+      if (!bodyWrapper) return { ok: false, reason: 'body wrapper not found' };
+
+      const contents = bodyWrapper.querySelectorAll(':scope > p, :scope > h2');
+      const contentParts = Array.from(contents).map(element => {
+        const tagName = element.tagName.toLowerCase();
+        const textContent = element.textContent.trim();
+        if (tagName === 'h2') return '## ' + textContent;
+        if (tagName === 'p') return textContent;
+        return textContent;
+      });
+      const contentString = contentParts.join('\\n\\n');
+      const h1 = articleWrapper.querySelector('h1');
+      const title = h1 ? h1.textContent.trim() : (document.title || '').trim();
+      return { ok: true, title, creationInfo, contentString, paragraphsCount: contentParts.length };
+    });
+
+    if (!articleData.ok) {
+      await browser.close();
+      return { site: siteFolder, results: [], error: 'Article extraction failed: ' + (articleData.reason || 'unknown') };
+    }
+
+    let featuredImage = null;
+    try {
+      featuredImage = await page.evaluate(FIND_FEATURED_IMAGE_SNIPPET);
+    } catch (e) { /* ignore */ }
+
+    const results = [];
+    results.push({
+      selector: 'article h1 (title)',
+      pass: !!(articleData.title),
+      foundCount: articleData.title ? 1 : 0,
+      preview: articleData.title || ''
+    });
+    results.push({
+      selector: 'article body paragraphs (inferred content)',
+      pass: !!(articleData.paragraphsCount && articleData.paragraphsCount > 0),
+      foundCount: articleData.paragraphsCount || 0,
+      preview: String((articleData.contentString || '').slice(0, 120))
+    });
+    results.push({
+      selector: 'featured image (comment snippet)',
+      pass: !!featuredImage,
+      foundCount: featuredImage ? 1 : 0,
+      preview: featuredImage || ''
+    });
+
+    await browser.close();
+    return { site: siteFolder, results };
+  } catch (err) {
+    try { await browser.close(); } catch (e) {}
+    return { site: siteFolder, results: [], error: String(err) };
+  }
+}
+
+async function runPhilstarTest(siteFolder, logger) {
+  const config = loadConfig();
+  const siteCfg = (config.sites && config.sites['philstar']) || {};
+  const urlArg = argv.url || argv.u || '';
+  const discover = argv.discover || (!urlArg);
+
+  if (!puppeteerExtra || !StealthPlugin) {
+    return { site: siteFolder, results: [], error: 'puppeteer-extra and stealth plugin required' };
+  }
+
+  const puppeteer = puppeteerExtra;
+  const UserAgentCtor = UserAgent;
+
+  const defaultChrome = path.join(repoRoot, '..', 'chrome', 'linux-121.0.6167.85', 'chrome-linux64', 'chrome');
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || (fs.existsSync(defaultChrome) ? defaultChrome : undefined);
+  if (!executablePath) {
+    return { site: siteFolder, results: [], error: `No puppeteer executablePath found. Set PUPPETEER_EXECUTABLE_PATH or commit chrome binary to ${defaultChrome}` };
+  }
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: config.puppeteer?.headless !== false,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      defaultViewport: { width: 1200, height: 900 },
+      executablePath
+    });
+  } catch (err) {
+    return { site: siteFolder, results: [], error: `Failed to launch browser: ${String(err)}` };
+  }
+
+  const page = await browser.newPage();
+  await page.setUserAgent(new UserAgentCtor().toString());
+  await page.setExtraHTTPHeaders({ 'accept-language': 'en-US,en;q=0.9' });
+
+  try {
+    let targetUrl = urlArg;
+
+    if (discover) {
+      const indexUrl = siteCfg.index_url || 'https://www.philstar.com/opinion';
+      await page.goto(indexUrl, { waitUntil: 'networkidle2', timeout: config.puppeteer?.defaultTimeout || 60000 });
+      try {
+        const hrefs = await page.$$eval(siteCfg.link_selector || '.article__teaser a', (els, attr) =>
+          els.map(e => e.getAttribute(attr) || e.href || '').filter(Boolean),
+          siteCfg.link_attr || 'href'
+        );
+        const unique = Array.from(new Set(hrefs)).slice(0, siteCfg.link_limit || 5);
+        if (unique.length) {
+          const abs = unique.map(h => {
+            try { return new URL(h, indexUrl).toString(); } catch (e) { return h; }
+          });
+          targetUrl = abs[0];
+        } else if (siteCfg.test_urls && siteCfg.test_urls.length) {
+          targetUrl = siteCfg.test_urls[0];
+        } else {
+          await browser.close();
+          return { site: siteFolder, results: [], error: 'Philstar discovery returned no links and no fallback test_urls' };
+        }
+      } catch (e) {
+        if (siteCfg.test_urls && siteCfg.test_urls.length) {
+          targetUrl = siteCfg.test_urls[0];
+        } else {
+          await browser.close();
+          return { site: siteFolder, results: [], error: `Philstar discovery failed: ${String(e)}` };
+        }
+      }
+    }
+
+    await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: config.puppeteer?.defaultTimeout || 60000 });
+
+    const data = await page.evaluate((contentSelector, featureSelector) => {
+      const titleEl = document.querySelector('h1.article__title') || document.querySelector('h1');
+      const title = titleEl ? titleEl.textContent.trim() : (document.title || '').trim();
+
+      const authorNode = document.querySelector('div.article__credits-author-pub');
+      const author = authorNode ? authorNode.textContent.trim() : '';
+
+      const dateNode = document.querySelector('div.article__date-published');
+      const date = dateNode ? dateNode.textContent.trim() : '';
+
+      let feature = null;
+      if (featureSelector) {
+        const f = document.querySelector(featureSelector);
+        if (f && f.src) feature = f.src;
+        else if (f) {
+          const img = f.querySelector('img');
+          if (img && img.src) feature = img.src;
+        }
+      } else {
+        const img = document.querySelector('div#sports_header_image img, figure img');
+        if (img && img.src) feature = img.src;
+      }
+
+      const contentContainer = document.querySelector(contentSelector) || document.querySelector('div.article__writeup') || null;
+      let paragraphs = [];
+      if (contentContainer) {
+        const ps = contentContainer.querySelectorAll(':scope > p');
+        paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(Boolean);
+      } else {
+        const ps = document.querySelectorAll('article p');
+        paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(Boolean);
+      }
+
+      return { title, author, date, feature, paragraphs, paragraphsCount: paragraphs.length };
+    }, siteCfg.content, siteCfg.feature_image_selector);
+
+    if (!data || !data.paragraphs || data.paragraphs.length === 0) {
+      await browser.close();
+      return { site: siteFolder, results: [], error: 'Philstar: no paragraphs extracted' };
+    }
+
+    const results = [];
+    results.push({
+      selector: 'h1.article__title (title)',
+      pass: !!(data.title),
+      foundCount: data.title ? 1 : 0,
+      preview: data.title || ''
+    });
+    results.push({
+      selector: siteCfg.content || 'article content (paragraphs)',
+      pass: !!(data.paragraphsCount && data.paragraphsCount > 0),
+      foundCount: data.paragraphsCount || 0,
+      preview: String((data.paragraphs && data.paragraphs[0]) || '').slice(0, 120)
+    });
+    results.push({
+      selector: 'feature image',
+      pass: !!data.feature,
+      foundCount: data.feature ? 1 : 0,
+      preview: data.feature || ''
+    });
+
+    await browser.close();
+    return { site: siteFolder, results };
+  } catch (err) {
+    try { await browser.close(); } catch (e) {}
+    return { site: siteFolder, results: [], error: String(err) };
+  }
+}
+
+// ---------- End embedded scraper helpers ----------
 
 (async () => {
   const RESULTS = {}; // per-site results
@@ -74,63 +402,69 @@ function randBase36(len = 4) {
       ];
       for (const p of possible) {
         if (fs.existsSync(p)) {
-          mod = require(p);
-          break;
+          try { mod = require(p); break; } catch (e) {
+            logger.error(`Failed requiring ${p}: ${String(e)}`);
+          }
         }
       }
       if (!mod) {
         // fallback: try package.json main
         const pj = path.join(sitePath, 'package.json');
         if (fs.existsSync(pj)) {
-          const pkg = JSON.parse(fs.readFileSync(pj));
-          if (pkg.main && fs.existsSync(path.join(sitePath, pkg.main))) {
-            mod = require(path.join(sitePath, pkg.main));
+          try {
+            const pkg = JSON.parse(fs.readFileSync(pj));
+            if (pkg.main && fs.existsSync(path.join(sitePath, pkg.main))) {
+              try { mod = require(path.join(sitePath, pkg.main)); } catch (e) {
+                logger.error(`Failed requiring package main for ${siteFolder}: ${String(e)}`);
+              }
+            }
+          } catch (e) {
+            logger.error(`Failed reading package.json for ${siteFolder}: ${String(e)}`);
           }
         }
       }
-      if (!mod) {
-        logger.error(`No module found for site folder "${siteFolder}", skipping.`);
-        return { site: siteFolder, results: [], error: 'No module' };
-      }
 
-      // Prefer testSelectors(interface)
-      if (typeof mod.testSelectors === 'function') {
-        // pass a small logger API so modules can use it during tests
+      if (mod && typeof mod.testSelectors === 'function') {
+        // module provides testSelectors
         const res = await mod.testSelectors(logger);
         return res;
-      } else {
-        // fallback: if module exports run() that returns scraped data, we can attempt to run it
-        if (typeof mod.run === 'function') {
-          logger.info('Calling run() for compatibility mode (no explicit testSelectors).');
-          try {
-            const data = await mod.run({ test: true });
-            // Guess selectors tested: try to find keys like title, content
-            // We'll create a single PASS result if data has main fields
-            const results = [];
-            if (data && (data.title || data.content || data.body)) {
-              results.push({
-                selector: 'inferred:main',
-                pass: true,
-                foundCount: 1,
-                preview: (data.title || data.content || data.body || '').toString().slice(0,75)
-              });
-            } else {
-              results.push({
-                selector: 'inferred:main',
-                pass: false,
-                foundCount: 0,
-                preview: '',
-                error: 'No main fields returned'
-              });
-            }
-            return { site: siteFolder, results };
-          } catch (err) {
-            logger.error(err);
-            return { site: siteFolder, results: [], error: err.stack || String(err) };
+      } else if (mod && typeof mod.run === 'function') {
+        logger.info('Calling run() for compatibility mode (no explicit testSelectors).');
+        try {
+          const data = await mod.run({ test: true });
+          const results = [];
+          if (data && (data.title || data.content || data.body)) {
+            results.push({
+              selector: 'inferred:main',
+              pass: true,
+              foundCount: 1,
+              preview: (data.title || data.content || data.body || '').toString().slice(0,75)
+            });
+          } else {
+            results.push({
+              selector: 'inferred:main',
+              pass: false,
+              foundCount: 0,
+              preview: '',
+              error: 'No main fields returned'
+            });
           }
+          return { site: siteFolder, results };
+        } catch (err) {
+          logger.error(err);
+          return { site: siteFolder, results: [], error: err.stack || String(err) };
+        }
+      } else {
+        // No module present. For some known site folders we have embedded logic:
+        if (siteFolder.toLowerCase() === 'inquirer') {
+          logger.info('Running embedded Inquirer scraper-test (no module found).');
+          return await runInquirerTest(siteFolder, logger);
+        } else if (siteFolder.toLowerCase() === 'philstar' || siteFolder.toLowerCase() === 'phils') {
+          logger.info('Running embedded Philstar scraper-test (no module found).');
+          return await runPhilstarTest(siteFolder, logger);
         } else {
-          logger.error('Module does not export testSelectors or run; skipping.');
-          return { site: siteFolder, results: [], error: 'No test entrypoints' };
+          logger.error(`No module found for site folder "${siteFolder}", skipping.`);
+          return { site: siteFolder, results: [], error: 'No module' };
         }
       }
     } catch (err) {
