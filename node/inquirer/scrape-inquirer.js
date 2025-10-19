@@ -5,6 +5,8 @@ const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const UserAgent = require('user-agents');
 const minimist = require('minimist');
+const markdownDocx = require('markdown-docx');
+const { Packer } = require('markdown-docx');
 
 puppeteer.use(StealthPlugin());
 
@@ -30,7 +32,8 @@ try {
 const siteCfg = (config.sites && config.sites['inquirer']) || {};
 
 const LOG_DIR = path.join(repoRoot, 'logs');
-const OUT_DIR = path.join(repoRoot, 'articles', 'inquirer');
+const OUT_DIR = path.join(repoRoot, 'articles', 'md', 'inquirer');
+const D_OUT_DIR = path.join(repoRoot, 'articles, 'docx', 'inquirer');
 
 try {
   fs.ensureDirSync(LOG_DIR);
@@ -59,6 +62,28 @@ function sanitizeFileName(s) {
     .trim();
 }
 
+async function md2docx(markdownFilePath, outputFilePath) {
+  try {
+    // 1. Read markdown content
+    // fs-extra's readFile is promisified and works with await
+    const markdown = await fs.readFile(markdownFilePath, 'utf-8');
+
+    // 2. Convert to docx document object
+    const doc = await markdownDocx(markdown);
+
+    // 3. Serialize to a buffer
+    const buffer = await Packer.toBuffer(doc);
+
+    // 4. Save to file
+    // fs-extra's writeFile is also promisified and works with await
+    await fs.writeFile(outputFilePath, buffer);
+
+    console.log(`Conversion completed successfully! Output saved to ${outputFilePath}`);
+  } catch (error) {
+    console.error('Error during conversion:', error);
+  }
+}
+
 const FIND_FEATURED_IMAGE_SNIPPET = `(function(){
   const walker = document.createTreeWalker(document, NodeFilter.SHOW_COMMENT, null, false);
   let node;
@@ -68,8 +93,8 @@ const FIND_FEATURED_IMAGE_SNIPPET = `(function(){
       for (let i=0;i<10 && cur;i++) {
         if (cur.nodeType === Node.ELEMENT_NODE) {
           const img = cur.querySelector ? cur.querySelector('img') : null;
-          if (img && img.src) return img.src;
-          if (cur.tagName && cur.tagName.toLowerCase() === 'img' && cur.src) return cur.src;
+          if (img && img.src && img.alt !== 'pdi') return img.src;
+          if (cur.tagName && img.alt !== 'pdi' && cur.tagName.toLowerCase() === 'img' && cur.src) return cur.src;
         }
         cur = cur.nextSibling;
       }
@@ -203,15 +228,25 @@ async function run() {
 
     const md = mdParts.filter(Boolean).join('\n\n');
 
-    const filename = `${fmtDate} ${sanitizeFileName(articleData.title || "### No Title")}.md`;
-    const outPath = path.join(OUT_DIR, filename);
+    const filename = `${fmtDate} ${sanitizeFileName(articleData.title || "### No Title")}`;
+    const outPath = path.join(OUT_DIR, filename, '.md');
+    const docxOut = path.join(D_OUT_DIR, filename, '.docx');
 
     try {
       fs.writeFileSync(outPath, md, 'utf8');
       appendLog(`Inquirer saved: ${outPath}`);
       console.log('Saved:', outPath);
+
+      try {
+        md2docx(outPath, doxOut);
+        appendLog(`Inquirer saved: ${outPath}`);
+        console.log('Saved:', outPath);
+      } catch (e) {
+        appendLog(`[WARNING] Failed docx creation: ${String(e)}`);
+        // warn only, dont throw
+      }
     } catch (err) {
-      appendLog(`Failed to write article file: ${String(err)}`);
+      appendLog(`Failed to write article md file: ${String(err)}`);
       throw err;
     }
 
