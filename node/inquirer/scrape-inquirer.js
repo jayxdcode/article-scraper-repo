@@ -33,7 +33,7 @@ const siteCfg = (config.sites && config.sites['inquirer']) || {};
 
 const LOG_DIR = path.join(repoRoot, 'logs');
 const OUT_DIR = path.join(repoRoot, 'articles', 'md', 'inquirer');
-const D_OUT_DIR = path.join(repoRoot, 'articles, 'docx', 'inquirer');
+const D_OUT_DIR = path.join(repoRoot, 'articles', 'docx', 'inquirer');
 
 try {
   fs.ensureDirSync(LOG_DIR);
