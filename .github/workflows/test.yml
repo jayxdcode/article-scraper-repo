@@ -22,14 +22,43 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Fail if package-lock.json missing
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "package-lock.json not found; this workflow expects the lockfile to be committed. Exiting."
+            exit 1
+          fi
+          
+      - name: Ensure node_modules present (exit on missing)
+        run: |
+          if [ -d "node_modules" ]; then
+            echo "node_modules present — continuing"
+            ls -ld node_modules || true
+          else
+            echo "node_modules is not present. Please run the 'deps-commit' workflow to create and commit node_modules. Exiting."
+            exit 1
+          fi
+
+      - name: Setup Node (for running tests)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
 
-      - name: Install dependencies
+      - name: Ensure Chromium binary committed
         run: |
-          npm ci || npm install
+          # path relative to repo root where we expect chrome to be committed
+          EXPECTED_CHROME_PATH="chrome/linux-121.0.6167.85/chrome-linux64/chrome"
+          if [ ! -x "$EXPECTED_CHROME_PATH" ] && [ ! -f "$EXPECTED_CHROME_PATH" ]; then
+            echo "Expected chrome binary not found at $EXPECTED_CHROME_PATH"
+            echo "Please run deps-commit workflow to commit the chrome binary."
+            exit 1
+          fi
+          echo "Found chrome binary at $EXPECTED_CHROME_PATH"
+
+      - name: Install chromium snap
+        run: |
+          echo "Attempting install..."
+          sudo snap install chromium
 
       - name: Prepare logs dir
         run: |
