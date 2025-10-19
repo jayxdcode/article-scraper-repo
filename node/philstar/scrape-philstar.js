@@ -5,6 +5,8 @@ const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const UserAgent = require('user-agents');
 const minimist = require('minimist');
+const markdownDocx = require('markdown-docx');
+const { Packer } = require('markdown-docx');
 
 puppeteer.use(StealthPlugin());
 
@@ -30,7 +32,8 @@ try {
 const siteCfg = (config.sites && config.sites['philstar']) || {};
 
 const LOG_DIR = path.join(repoRoot, 'logs');
-const OUT_DIR = path.join(repoRoot, 'articles', 'philstar');
+const OUT_DIR = path.join(repoRoot, 'articles', 'md', 'philstar');
+const D_OUT_DIR = path.join(repoRoot, 'articles', 'docx', 'philstar');
 
 try {
   fs.ensureDirSync(LOG_DIR);
@@ -53,8 +56,33 @@ function sanitizeFileName(s) {
   return String(s || 'article')
     .replace(/[\\/]/g, '_')
     .replace(/[<>:\\"|?*\x00-\x1F]/g, '')
+    .replace(/[\u201C\u201D\u201E\u2033]/g, '-') // Double quotes
+    .replace(/[\u2018\u2019\u2032]/g, " ");   // Single quotes/Apostrophes
     .slice(0,200)
     .trim();
+}
+
+async function md2docx(markdownFilePath, outputFilePath) {
+  try {
+    // 1. Read markdown content
+    // fs-extra's readFile is promisified and works with await
+    const markdown = await fs.readFile(markdownFilePath, 'utf-8');
+
+    // 2. Convert to docx document object
+    const doc = await markdownDocx(markdown);
+
+    // 3. Serialize to a buffer
+    const buffer = await Packer.toBuffer(doc);
+
+    // 4. Save to file
+    // fs-extra's writeFile is also promisified and works with await
+    await fs.writeFile(outputFilePath, buffer);
+
+    console.log(`Conversion completed successfully! Output saved to ${outputFilePath}`);
+  } catch (error) {
+    appendLog('Error during conversion:, error);
+    console.error('Error during conversion:', error);
+  }
 }
 
 // Default navigation timeout: 45 seconds unless overridden in config.puppeteer.defaultTimeout
@@ -238,13 +266,24 @@ async function run() {
       data.paragraphs.join('\n\n')
     ].filter(Boolean).join('\n\n');
 
-    const filename = `${fmtDate} ${sanitizeFileName(data.title || "### No Title")}.md`;
-    const outPath = path.join(OUT_DIR, filename);
+    const filename = `${fmtDate} ${sanitizeFileName(data.title || "### No Title")}`;
+    const outPath = path.join(OUT_DIR, filename, '.md');
+    const docxOut = path.join(D_OUT_DIR, filename, '.docx');
 
     try {
       fs.writeFileSync(outPath, md, 'utf8');
       appendLog('Philstar saved: ' + outPath);
       console.log('Saved:', outPath);
+
+      try {
+        md2docx(outPath, doxOut);
+        appendLog(`Philstar saved: ${outPath}`);
+        console.log('Saved:', outPath);
+      } catch (e) {
+        appendLog(`[WARNING] Failed docx creation: ${String(e)}`);
+        // warn only, dont throw
+      }
+      
     } catch (err) {
       appendLog('Philstar failed to write file: ' + String(err));
       throw err;
