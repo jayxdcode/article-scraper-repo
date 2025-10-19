@@ -46,6 +46,39 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install @actions/core if missing and commit
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -d "node_modules/@actions/core" ]; then
+            echo "@actions/core already present. Skipping installation."
+            exit 0
+          fi
+
+          echo "@actions/core not found. Installing..."
+          npm install @actions/core@latest --no-audit --no-fund
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Stage relevant files (node_modules, lockfile, and possibly package.json)
+          git add -A node_modules package-lock.json package.json || true
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            COMMIT_MSG="chore(deps): add @actions/core to node_modules (auto-added by workflow)"
+            git commit -m "$COMMIT_MSG"
+
+            REPO="${GITHUB_REPOSITORY}"
+            BRANCH="${GITHUB_REF##*/}"
+            echo "Pushing changes to $REPO on branch $BRANCH..."
+            git push "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH}"
+          fi
+          
       - name: Ensure Chromium binary committed
         run: |
           # path relative to repo root where we expect chrome to be committed
