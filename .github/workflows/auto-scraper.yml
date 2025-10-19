@@ -57,6 +57,11 @@ jobs:
           fi
           echo "Found chrome binary at $EXPECTED_CHROME_PATH"
 
+      - name: Install chromium snap
+        run: |
+          echo "Attempting install..."
+          sudo snap install chromium
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
