@@ -57,8 +57,10 @@ function appendLog(line) {
 function sanitizeFileName(s) {
   return String(s || 'article')
     .replace(/[\\/]/g, '_')
-    .replace(/[<>:\"|?*\x00-\x1F]/g, '')
-    .slice(0, 200)
+    .replace(/[<>:\\"|?*\x00-\x1F]/g, '')
+    .replace(/[\u201C\u201D\u201E\u2033]/g, '-') // Double quotes
+    .replace(/[\u2018\u2019\u2032]/g, " ") // Single quotes/Apostrophes
+    .slice(0,200)
     .trim();
 }
 
