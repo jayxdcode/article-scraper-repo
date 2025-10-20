@@ -33,16 +33,17 @@ jobs:
           node-version: '20'
 
       - name: Cache dependencies
-        id: cache-deps
-        uses: actions/cache@v4
+        id: cache-deps # Assign an ID for later reference
+        uses: actions/cache@v4 # Use the latest version of the cache action
         with:
           path: |
-            ~/node_modules
-            ~/chrome
-            /snap
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+            node_modules
+            .puppeteer-cache
+            chrome 
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Unique key based on OS and package-lock.json hash
           restore-keys: |
             ${{ runner.os }}-node-
+          if-no-files-found: ignore
 
       - name: Ensure package-lock.json (generate and commit if missing)
         env:
