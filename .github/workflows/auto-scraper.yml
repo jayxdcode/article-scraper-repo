@@ -45,7 +45,7 @@ jobs:
         with:
           path: |
             node_modules
-            .pupeteer-cache
+            .puppeteer-cache
             chrome 
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Unique key based on OS and package-lock.json hash
           restore-keys: |
