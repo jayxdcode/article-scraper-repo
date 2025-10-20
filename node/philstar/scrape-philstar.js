@@ -32,8 +32,8 @@ try {
 const siteCfg = (config.sites && config.sites['philstar']) || {};
 
 const LOG_DIR = path.join(repoRoot, 'logs');
-const OUT_DIR = path.join(repoRoot, 'articles', 'md', 'philstar');
-const D_OUT_DIR = path.join(repoRoot, 'articles', 'docx', 'philstar');
+const OUT_DIR = path.join(repoRoot, 'articles', 'md', 'Philstar');
+const D_OUT_DIR = path.join(repoRoot, 'articles', 'docx', 'Philstar');
 
 try {
   fs.ensureDirSync(LOG_DIR);
@@ -52,12 +52,13 @@ function appendLog(line) {
     console.error('Failed to append log:', e && e.message ? e.message : e);
   }
 }
+
 function sanitizeFileName(s) {
   return String(s || 'article')
     .replace(/[\\/]/g, '_')
     .replace(/[<>:\\"|?*\x00-\x1F]/g, '')
     .replace(/[\u201C\u201D\u201E\u2033]/g, '-') // Double quotes
-    .replace(/[\u2018\u2019\u2032]/g, " ");   // Single quotes/Apostrophes
+    .replace(/[\u2018\u2019\u2032]/g, " ") // Single quotes/Apostrophes
     .slice(0,200)
     .trim();
 }
