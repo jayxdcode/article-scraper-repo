@@ -2,7 +2,7 @@
 
 https://jayxdcode.github.io/article-scraper-repo/
 
-[![Workflow status](https://github.com/jayxdcode/article-scraper-repo/actions/workflows/test.yml/badge.svg)](https://github.com/jayxdcode/article-scraper-repo/actions/workflows/test.yml)
+[![Workflow status](https://github.com/jayxdcode/article-scraper-repo/actions/workflows/auto-scraper.yml/badge.svg)](https://github.com/jayxdcode/article-scraper-repo/actions/workflows/auto-scraper.yml)
 
 A dual-implementation scraping toolkit featuring both **Node.js** and **Python** versions for extracting, structuring, and processing article content from various online platforms.
 
