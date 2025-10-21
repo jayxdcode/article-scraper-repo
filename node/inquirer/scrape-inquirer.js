@@ -82,6 +82,7 @@ async function md2docx(markdownFilePath, outputFilePath) {
 
     console.log(`Conversion completed successfully! Output saved to ${outputFilePath}`);
   } catch (error) {
+    appendLog('Error during conversion:', error);
     console.error('Error during conversion:', error);
   }
 }
