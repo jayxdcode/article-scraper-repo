@@ -8,7 +8,7 @@ on:
       generate_lock_forced:
         description: 'If true, create a new package-lock.json, even if it already exists'
         required: false
-        default: 'true'
+        default: 'false'
       site:
         description: 'Site to run (inquirer or philstar). Leave empty to run both.'
         required: false
@@ -16,7 +16,7 @@ on:
       run_tests_first:
         description: 'Run tests first (true/false)'
         required: false
-        default: 'true'
+        default: 'false'
 
 permissions:
   contents: write
