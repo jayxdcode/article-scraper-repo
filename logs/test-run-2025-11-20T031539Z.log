@@ -1,0 +1,66 @@
+Test Run: 2025-11-20_kxrq
+
+---
+Testing site: inquirer
+[inquirer] INFO: Running embedded Inquirer scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+[inquirer] INFO: Inquirer discovered: https://opinion.inquirer.net/187633/a-self-serving-narrative
+querySelector `article h1 (title)`: PASS
+found count: 1
+idx0 content: A self-serving narrative
+
+querySelector `article body paragraphs (inferred content)`: PASS
+found count: 17
+idx0 content: The video revelations presented over the weekend by former Ako Bicol party 
+
+querySelector `featured image (comment snippet)`: PASS
+found count: 0
+idx0 content: No image. This will be marked pass regardless
+
+---
+Testing site: philstar
+[philstar] INFO: Running embedded Philstar scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+querySelector `h1.article__title (title)`: PASS
+found count: 1
+idx0 content: EDITORIAL - Corruption’seconomic toll
+
+querySelector `div#sports_article_writeup.article__writeup`: PASS
+found count: 10
+idx0 content: Alongside efforts to hold crooks accountable and implement reforms to preve
+
+querySelector `feature image`: PASS
+found count: 1
+idx0 content: https://media.philstar.com/photos/2025/11/19/editorialdefault-22023-05-3013
+
+---
+
+=========================================
+TEST RESULTS
+=========================================
+inquirer:
+  3 PASS, 0 FAIL
+philstar:
+  3 PASS, 0 FAIL
+
+---
+
+Totals: 6 PASS, 0 FAIL
+
+
+Wrote full log to /home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2025-11-20T03-16-12-741Z.log
+LOGFILE:/home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2025-11-20T03-16-12-741Z.log
