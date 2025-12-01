@@ -1,0 +1,69 @@
+Test Run: 2025-12-01_tfaz
+
+---
+Testing site: inquirer
+[inquirer] INFO: Running embedded Inquirer scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+[inquirer] INFO: Inquirer discovered: https://opinion.inquirer.net/187866/stark-reality-about-retirement
+querySelector `article h1 (title)`: PASS
+found count: 1
+idx0 content: Stark reality about retirement
+
+querySelector `article body paragraphs (inferred content)`: PASS
+found count: 14
+idx0 content: Many Filipinos dream of a fulfilling retirement, either at age 65 or 60, or
+
+querySelector `featured image (comment snippet)`: PASS
+found count: 0
+idx0 content: No image. This will be marked pass regardless
+
+---
+Testing site: philstar
+[philstar] INFO: Running embedded Philstar scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+[philstar] INFO: Philstar discovery goto failed, attempting raw fetch fallback for index page
+[FALLBACK] Attempting raw fetch fallback for: https://www.philstar.com/opinion
+[FALLBACK] Raw fetch and setContent succeeded
+querySelector `h1.article__title (title)`: PASS
+found count: 1
+idx0 content: EDITORIAL - Don’t disappoint
+
+querySelector `div#sports_article_writeup.article__writeup`: PASS
+found count: 12
+idx0 content: We feel you. We hear you. We will not disappoint you.
+
+querySelector `feature image`: PASS
+found count: 1
+idx0 content: https://media.philstar.com/photos/2023/05/30/editorialdefault-1_2023-05-30_
+
+---
+
+=========================================
+TEST RESULTS
+=========================================
+inquirer:
+  3 PASS, 0 FAIL
+philstar:
+  3 PASS, 0 FAIL
+
+---
+
+Totals: 6 PASS, 0 FAIL
+
+
+Wrote full log to /home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2025-12-01T03-57-15-312Z.log
+LOGFILE:/home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2025-12-01T03-57-15-312Z.log
