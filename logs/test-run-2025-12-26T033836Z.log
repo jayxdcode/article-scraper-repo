@@ -1,0 +1,54 @@
+Test Run: 2025-12-26_49uh
+
+---
+Testing site: inquirer
+[inquirer] INFO: Running embedded Inquirer scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+[inquirer] INFO: Inquirer discovery fallback to test_url: https://opinion.inquirer.net/186794/skewed-sense-of-entitlement
+---
+Testing site: philstar
+[philstar] INFO: Running embedded Philstar scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+querySelector `h1.article__title (title)`: PASS
+found count: 1
+idx0 content: EDITORIAL-  Science-based flood control
+
+querySelector `div#sports_article_writeup.article__writeup`: PASS
+found count: 9
+idx0 content: Better late than never. Amid the still widening corruption scandal, governm
+
+querySelector `feature image`: PASS
+found count: 1
+idx0 content: https://media.philstar.com/photos/2025/12/25/editorialdefault-12023-05-3013
+
+---
+
+=========================================
+TEST RESULTS
+=========================================
+inquirer:
+  0 PASS, 0 FAIL
+philstar:
+  3 PASS, 0 FAIL
+
+---
+
+Totals: 3 PASS, 0 FAIL
+
+
+Wrote full log to /home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2025-12-26T03-39-23-019Z.log
+LOGFILE:/home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2025-12-26T03-39-23-019Z.log
