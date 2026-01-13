@@ -1,0 +1,65 @@
+Test Run: 2026-01-13_6668
+
+---
+Testing site: inquirer
+[inquirer] INFO: Running embedded Inquirer scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+[inquirer] INFO: Inquirer discovered: https://opinion.inquirer.net/188975/backdoors-to-corruption
+[inquirer] INFO: Page.goto failed: Navigation timeout of 60000 ms exceeded
+[inquirer] INFO: Navigation timed out; trying raw fetch fallback
+[FALLBACK] Attempting raw fetch fallback for: https://opinion.inquirer.net/188975/backdoors-to-corruption
+[FALLBACK] Raw fetch and setContent succeeded
+---
+Testing site: philstar
+[philstar] INFO: Running embedded Philstar scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+[philstar] INFO: Philstar discovery goto failed, attempting raw fetch fallback for index page
+[FALLBACK] Attempting raw fetch fallback for: https://www.philstar.com/opinion
+[FALLBACK] Raw fetch and setContent succeeded
+[philstar] INFO: Philstar page.goto failed: Navigation timeout of 60000 ms exceeded
+[philstar] INFO: Philstar navigation timed out; trying raw fetch fallback
+[FALLBACK] Attempting raw fetch fallback for: https://www.philstar.com/opinion/2026/01/12/2500316/editorial-enablers-theft
+[FALLBACK] Raw fetch and setContent succeeded
+querySelector `h1.article__title (title)`: PASS
+found count: 1
+idx0 content: EDITORIAL — Enablers of theft
+
+querySelector `div#sports_article_writeup.article__writeup`: PASS
+found count: 9
+idx0 content: If you’re wondering why your internet and landline services are malfunction
+
+querySelector `feature image`: PASS
+found count: 1
+idx0 content: https://media.philstar.com/photos/2023/05/30/editorialdefault-1_2023-05-30_
+
+---
+
+=========================================
+TEST RESULTS
+=========================================
+inquirer:
+  0 PASS, 0 FAIL
+philstar:
+  3 PASS, 0 FAIL
+
+---
+
+Totals: 3 PASS, 0 FAIL
+
+
+Wrote full log to /home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2026-01-13T03-46-44-031Z.log
+LOGFILE:/home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2026-01-13T03-46-44-031Z.log
