@@ -2,7 +2,7 @@ name: Auto Scraper (Inquirer + Philstar)
 
 on:
   schedule:
-    - cron: '0 2 * * *' # daily 02:00 UTC
+    - cron: '0 4 * * *' # daily 04:00 UTC
   workflow_dispatch:
     inputs:
       generate_lock_forced:
