@@ -97,29 +97,33 @@ async function discoverLinks(page) {
     const links = await page.$$eval(
       siteCfg.items_selector || '.carousel__item', 
       (els, cfg) => {
-        // Regex to match "second", "minute", or "hour" (case-insensitive)
         const recentRegex = /second|minute|hour/i;
 
         return els
           .filter(e => {
-            const timeEl = e.querySelector(cfg.pub_time || '.article__date'); // dont trust fallbacks ^^
+            // FIX: Use the key name passed in the third argument (pub_time)
+            const timeEl = e.querySelector(cfg.pub_time); 
             const timeStr = timeEl ? timeEl.innerText.toLowerCase() : '';
-            // Only keep items published within the last 24 hours
             return recentRegex.test(timeStr);
           })
-          .map(e => e.getAttribute(cfg.link_attr || 'href') || e.href || '')
-          .filter(Boolean);
+          .map(e => {
+            // FIX: Robust link extraction
+            const attr = e.getAttribute(cfg.link_attr || 'href');
+            return attr || e.href || '';
+          })
+          .filter(link => link.trim().length > 0);
       },
-      { link_attr: siteCfg.link_attr, pub_time_selector: siteCfg.pub_time_selector }
+      // Ensure these keys match the usage inside the function above
+      { link_attr: siteCfg.link_attr, pub_time: siteCfg.pub_time || '.article__date' }
     );
 
-    // Filter unique and apply the limit (usually 1 based on your request)
     const unique = Array.from(new Set(links)).slice(0, siteCfg.link_limit || 1);
     
     const abs = unique.map(h => {
       try { return new URL(h, indexUrl).toString(); } catch (e) { return h; }
     });
     
+    console.log(`[DEBUG] list output: ${JSON.stringify(abs)}`);
     return abs;
   } catch (e) {
     appendLog('Philstar discovery failed: ' + String(e));
@@ -240,6 +244,7 @@ async function run() {
 
     // Extraction runs the same whether we navigated or used setContent from fallback
     const data = await page.evaluate((contentSelector, featureSelector) => {
+      const url = window.location.toString();
       const titleEl = document.querySelector('h1.article__title') || document.querySelector('h1');
       const title = titleEl ? titleEl.textContent.trim() : (document.title || '').trim();
 
@@ -272,7 +277,7 @@ async function run() {
         paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(Boolean);
       }
 
-      return { title, author, date, feature, paragraphs };
+      return { url, title, author, date, feature, paragraphs };
     }, siteCfg.content, siteCfg.feature_image_selector);
 
     if (!data || !data.paragraphs || data.paragraphs.length === 0) {
@@ -285,6 +290,7 @@ async function run() {
       data.author ? `#### ${data.author}` : '',
       data.date ? `#### ${data.date}` : '',
       data.feature ? `![featured](${data.feature})` : '',
+      data.url ? `[${data.url}](${data.url})` : '',
       '---',
       '',
       data.paragraphs.join('\n\n')
