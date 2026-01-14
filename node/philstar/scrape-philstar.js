@@ -92,15 +92,34 @@ const NAV_TIMEOUT = config.puppeteer?.defaultTimeout ?? 45000;
 async function discoverLinks(page) {
   const indexUrl = siteCfg.index_url || 'https://www.philstar.com/opinion';
   await page.goto(indexUrl, { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+  
   try {
-    const hrefs = await page.$$eval(siteCfg.link_selector || '.article__teaser a', (els, attr) =>
-      els.map(e => e.getAttribute(attr) || e.href || '').filter(Boolean),
-      siteCfg.link_attr || 'href'
+    const links = await page.$$eval(
+      siteCfg.items_selector || '.carousel__item', 
+      (els, cfg) => {
+        // Regex to match "second", "minute", or "hour" (case-insensitive)
+        const recentRegex = /second|minute|hour/i;
+
+        return els
+          .filter(e => {
+            const timeEl = e.querySelector(cfg.pub_time || '.article__date'); // dont trust fallbacks ^^
+            const timeStr = timeEl ? timeEl.innerText.toLowerCase() : '';
+            // Only keep items published within the last 24 hours
+            return recentRegex.test(timeStr);
+          })
+          .map(e => e.getAttribute(cfg.link_attr || 'href') || e.href || '')
+          .filter(Boolean);
+      },
+      { link_attr: siteCfg.link_attr, pub_time_selector: siteCfg.pub_time_selector }
     );
-    const unique = Array.from(new Set(hrefs)).slice(0, siteCfg.link_limit || 5);
+
+    // Filter unique and apply the limit (usually 1 based on your request)
+    const unique = Array.from(new Set(links)).slice(0, siteCfg.link_limit || 1);
+    
     const abs = unique.map(h => {
       try { return new URL(h, indexUrl).toString(); } catch (e) { return h; }
     });
+    
     return abs;
   } catch (e) {
     appendLog('Philstar discovery failed: ' + String(e));
@@ -184,12 +203,16 @@ async function run() {
       appendLog('Philstar: discovery mode');
       const links = await discoverLinks(page);
       if (!links || !links.length) {
-        appendLog('Philstar discovery returned no links; falling back to test_urls if present');
+        appendLog('Philstar discovery returned no links. Skipping...');
+        throw new Error('No philstar links discovered. Either selector are incorrect or no article is uploaded yet.');
+      
+        /*
         if (siteCfg.test_urls && siteCfg.test_urls.length) {
           targetUrl = siteCfg.test_urls[0];
         } else {
           throw new Error('No philstar links discovered and no fallback test_urls');
         }
+        */
       } else {
         targetUrl = links[0];
         appendLog('Philstar discovered: ' + targetUrl);
