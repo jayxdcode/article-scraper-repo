@@ -21,6 +21,8 @@
     },
     "philstar": {
       "index_url": "https://www.philstar.com/opinion",
+      "items_selector": ".carousel__item",
+      "pub_time": ".carousel__item__time",
       "link_selector": ".carousel__item a",
       "link_attr": "href",
       "link_limit": 5,
