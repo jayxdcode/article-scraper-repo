@@ -109,21 +109,39 @@ const FIND_FEATURED_IMAGE_SNIPPET = `(function(){
 async function discoverLatestIndex(page) {
   const indexUrl = siteCfg.index_url || 'https://opinion.inquirer.net/';
   await page.goto(indexUrl, { waitUntil: 'networkidle2', timeout: config.puppeteer?.defaultTimeout || 60000 });
-  const found = await page.evaluate(() => {
-    if (window.location.hostname === 'opinion.inquirer.net' && window.location.pathname === '/') {
-      const listing = document.querySelectorAll("div#opinion-v2-mh");
-      const latest = listing && listing[0];
-      if (!latest) return { ok: false, reason: 'listing not found' };
-      const articleDateEl = latest.querySelector("div.oped-date");
-      const articleDate = articleDateEl ? articleDateEl.textContent.trim() : '';
-      const articleAnchor = latest.querySelector("a");
-      if (!articleAnchor) return { ok: false, reason: 'anchor not found in latest' };
-      const articleUrl = articleAnchor.href;
-      const title = articleAnchor.textContent ? articleAnchor.textContent.trim() : '';
-      return { ok: true, articleUrl, title, articleDate };
+
+  // Get today's date in "Month DD, YYYY" format to match Inquirer's display
+  const today = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  const todayString = today.toLocaleDateString('en-US', options); 
+
+  const found = await page.evaluate((targetDate) => {
+    if (window.location.hostname === 'opinion.inquirer.net') {
+      // 1. Select all potential article items
+      const listings = document.querySelectorAll("div#opinion-v2-mh");
+      
+      for (const item of listings) {
+        const articleDateEl = item.querySelector("div.oped-date");
+        const articleDate = articleDateEl ? articleDateEl.textContent.trim() : '';
+        
+        // 2. Check if the date matches today
+        if (articleDate === targetDate) {
+          const articleAnchor = item.querySelector("a");
+          if (articleAnchor) {
+            return { 
+              ok: true, 
+              articleUrl: articleAnchor.href, 
+              title: articleAnchor.textContent ? articleAnchor.textContent.trim() : '', 
+              articleDate 
+            };
+          }
+        }
+      }
+      return { ok: false, reason: `No article found matching date: ${targetDate}` };
     }
-    return { ok: false, reason: 'not listing root' };
-  });
+    return { ok: false, reason: 'Not on the opinion index page' };
+  }, todayString); // Pass todayString into the browser context
+
   return found;
 }
 
@@ -241,7 +259,7 @@ async function run() {
       console.log('Saved:', outPath);
 
       try {
-        md2docx(outPath, doxOut);
+        md2docx(outPath, docxOcut);
         appendLog(`Inquirer saved: ${outPath}`);
         console.log('Saved:', outPath);
       } catch (e) {
