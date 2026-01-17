@@ -91,7 +91,7 @@ const NAV_TIMEOUT = config.puppeteer?.defaultTimeout ?? 45000;
 
 async function discoverLinks(page) {
   const indexUrl = siteCfg.index_url || 'https://www.philstar.com/opinion';
-  await page.goto(indexUrl, { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+  await page.goto(indexUrl, { waitUntil: 'networkidle2', timeout: NAV_TIMEOUT });
   
   try {
     const links = await page.$$eval(
