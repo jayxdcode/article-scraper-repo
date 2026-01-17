@@ -306,7 +306,7 @@ async function run() {
       console.log('Saved:', outPath);
 
       try {
-        md2docx(outPath, doxOut);
+        md2docx(outPath, docxOut);
         appendLog(`Philstar saved: ${outPath}`);
         console.log('Saved:', outPath);
       } catch (e) {
