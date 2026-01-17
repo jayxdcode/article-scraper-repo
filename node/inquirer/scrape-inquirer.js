@@ -168,7 +168,7 @@ async function run() {
   let browser;
   try {
     browser = await puppeteer.launch({
-      headless: config.puppeteer?.headless !== false,
+      headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
       defaultViewport: { width: 1200, height: 900 },
       executablePath
