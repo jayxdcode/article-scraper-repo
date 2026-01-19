@@ -242,7 +242,7 @@ async function run() {
       console.log('Saved:', outPath);
 
       try {
-        md2docx(outPath, doxOut);
+        await md2docx(outPath, doxOut);
         appendLog(`Inquirer saved: ${outPath}`);
         console.log('Saved:', outPath);
       } catch (e) {
