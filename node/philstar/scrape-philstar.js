@@ -230,10 +230,10 @@ async function run() {
       let paragraphs = [];
       if (contentContainer) {
         const ps = contentContainer.querySelectorAll('p');
-        paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(p => (p.length > 13); // 13 = legth of "ADVERTISEMENT"
+        paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(p => (p.length > 13 && p !== "ADVERTISEMENT")); 
       } else {
         const ps = document.querySelectorAll('article p');
-        paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(p => (p.length > 13); // 13 = legth of "ADVERTISEMENT"
+        paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(p => (p.length > 13 && p !== "ADVERTISEMENT")); 
       }
 
       return { url, title, author, date, feature, paragraphs };
