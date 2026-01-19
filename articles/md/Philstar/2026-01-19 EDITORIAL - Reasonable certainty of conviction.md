@@ -8,11 +8,9 @@
 
 ![featured](https://media.philstar.com/photos/2026/01/18/editorialdefault-22023-05-3013-52-21_2026-01-18_20-28-00.jpg)
 
-[Source](https://www.philstar.com/opinion/2026/01/19/2501895/editorial-reasonable-certainty-conviction)
+[https://www.philstar.com/opinion/2026/01/19/2501895/editorial-reasonable-certainty-conviction](https://www.philstar.com/opinion/2026/01/19/2501895/editorial-reasonable-certainty-conviction)
 
 ---
-
-ADVERTISEMENT
 
 Government prosecutors are supposed to be building up cases based on higher standards of evidence. Instead of filing a case in court based on evidence supporting probable cause, they have been tasked to build strong cases with a “reasonable certainty of conviction.”
 
