@@ -230,10 +230,10 @@ async function run() {
       let paragraphs = [];
       if (contentContainer) {
         const ps = contentContainer.querySelectorAll('p');
-        paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(p => p.length > 5);
+        paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(p => (p.length > 13); // 13 = legth of "ADVERTISEMENT"
       } else {
         const ps = document.querySelectorAll('article p');
-        paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(p => p.length > 5);
+        paragraphs = Array.from(ps).map(p => p.textContent.trim()).filter(p => (p.length > 13); // 13 = legth of "ADVERTISEMENT"
       }
 
       return { url, title, author, date, feature, paragraphs };
@@ -249,7 +249,7 @@ async function run() {
       data.author ? `#### ${data.author}` : '',
       data.date ? `#### ${data.date}` : '',
       data.feature ? `![featured](${data.feature})` : '',
-      data.url ? `[Source](${data.url})` : '',
+      data.url ? `[${data.url}](${data.url})` : '',
       '---',
       '',
       data.paragraphs.join('\n\n')
