@@ -1,0 +1,57 @@
+Test Run: 2026-01-20_nohu
+
+---
+Testing site: inquirer
+[inquirer] INFO: Running embedded Inquirer scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+[inquirer] INFO: Inquirer discovered: https://opinion.inquirer.net/189135/atong-on-the-run
+querySelector `article h1 (title)`: PASS
+found count: 1
+idx0 content: Atong on the run
+
+querySelector `article body paragraphs (inferred content)`: PASS
+found count: 23
+idx0 content: For years, the disappearance of dozens of “sabungeros” or cockfighting enth
+
+querySelector `featured image (comment snippet)`: PASS
+found count: 0
+idx0 content: No image. This will be marked pass regardless
+
+---
+Testing site: philstar
+[philstar] INFO: Running embedded Philstar scraper-test (no module found).
+[1m[43m[30m
+  Puppeteer old Headless deprecation warning:[0m[33m
+    In the near future `headless: true` will default to the new Headless mode
+    for Chrome instead of the old Headless implementation. For more
+    information, please see https://developer.chrome.com/articles/new-headless/.
+    Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+    If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+
+[philstar] INFO: Philstar discovery goto failed, attempting raw fetch fallback for index page
+[FALLBACK] Attempting raw fetch fallback for: https://www.philstar.com/opinion
+[FALLBACK] Raw fetch and setContent succeeded
+---
+
+=========================================
+TEST RESULTS
+=========================================
+inquirer:
+  3 PASS, 0 FAIL
+philstar:
+  0 PASS, 0 FAIL
+
+---
+
+Totals: 3 PASS, 0 FAIL
+
+
+Wrote full log to /home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2026-01-20T03-50-36-145Z.log
+LOGFILE:/home/runner/work/article-scraper-repo/article-scraper-repo/node/logs/test-run-2026-01-20T03-50-36-145Z.log
