@@ -53,7 +53,7 @@ The **Node.js version is currently active and maintained**, while the **Python v
 ### ✅ Prerequisites
 - ✅ Node.js v14+  
 - ✅ npm (or pnpm/yarn)  
-- ✅ Git  
+- ✅ Git
 
 ### 📥 Installation Steps
 
@@ -147,17 +147,6 @@ Runtime
 
 ---
 
-## 🤝 Contributing
-
-We welcome contributions in both Node.js and Python tracks, including: ✅ Selector fixes
-✅ New site support
-✅ Code optimization
-✅ Python scraper reactivation
-
-📬 Please open an Issue or Pull Request following our future CONTRIBUTING.md guidelines.
-
-
----
 
 ## 📄 License
 
@@ -167,4 +156,4 @@ See the full details in the LICENSE file.
 
 ---
 
-*Ideas, enhancements, or questions? Open an issue and let’s build something better together!*
+*Ideas, enhancements, or questions? Open an issue and i'll figure it out.*
